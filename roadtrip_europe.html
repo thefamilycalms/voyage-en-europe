@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Roadtrip Europe</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"/>
+
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --panel: #fffef9;
+    --red: #c8372b;
+    --red-light: #e8604f;
+    --ink: #1a1a2e;
+    --muted: #6b6b7d;
+    --gold: #c9933a;
+    --border: #e0d8c8;
+    --shadow: 0 4px 24px rgba(26,26,46,0.10);
+    --shadow-sm: 0 2px 10px rgba(26,26,46,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+    z-index: 100;
+  }
+
+  .logo {
+    width: 40px;
+    height: 40px;
+    background: var(--red);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(200,55,43,0.3);
+  }
+
+  .header-title {
+    flex: 1;
+  }
+
+  .header-title h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.3px;
+  }
+
+  .header-title p {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 24px;
+    padding-right: 4px;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--red);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  /* ─── MAIN LAYOUT ─── */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  /* ─── MAP ─── */
+  #map {
+    flex: 1;
+    height: 100%;
+    z-index: 1;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: 320px;
+    flex-shrink: 0;
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: -4px 0 18px rgba(26,26,46,0.06);
+    z-index: 10;
+  }
+
+  .sidebar-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d4e 100%);
+    color: white;
+  }
+
+  .sidebar-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    letter-spacing: -0.2px;
+  }
+
+  .sidebar-header p {
+    font-size: 12px;
+    opacity: 0.7;
+    line-height: 1.5;
+    font-weight: 300;
+  }
+
+  .route-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(200,55,43,0.25);
+    border: 1px solid rgba(200,55,43,0.4);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #ffb5ae;
+    margin-top: 10px;
+  }
+
+  .route-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--red-light);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.4); }
+  }
+
+  /* ─── PLANNING ─── */
+  .planning-list {
+    padding: 10px 0;
+  }
+
+  .country-block {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .country-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+  }
+
+  .country-header:hover { background: rgba(26,26,46,0.03); }
+
+.country-flag {
+  width: 16px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+  .country-info { flex: 1; }
+
+  .country-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .country-dates {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .country-duration {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--red);
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .country-duration span {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .country-chevron {
+    font-size: 10px;
+    color: var(--muted);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .country-block.open .country-chevron { transform: rotate(90deg); }
+
+  .country-details {
+    display: none;
+    padding: 0 20px 12px 20px;
+    background: rgba(245,240,232,0.5);
+  }
+
+  .country-block.open .country-details { display: block; }
+
+  .country-note {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+
+  .country-stops {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .country-stop {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ink);
+  }
+
+  .stop-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  /* ─── LÉGENDE ─── */
+  .legend-box {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+
+  .legend-title {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ─── POPUPS ─── */
+  .leaflet-popup-content-wrapper {
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(26,26,46,0.18) !important;
+    border: none !important;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  .leaflet-popup-content {
+    margin: 0 !important;
+    width: 220px !important;
+  }
+
+  .leaflet-popup-tip-container { display: none; }
+
+  .popup {
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .popup-img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .popup-body {
+    padding: 12px 14px;
+  }
+
+  .popup h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .popup p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+
+  .popup ul {
+    padding-left: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ─── CUSTOM MARKERS ─── */
+  .city-marker {
+    background: #1a1a2e;
+    border: 2.5px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(26,26,46,0.35);
+    transition: all 0.2s;
+  }
+
+  .poi-marker {
+    background: var(--gold);
+    border: 2.5px solid white;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(201,147,58,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .poi-marker::after {
+    content: '★';
+    color: white;
+    font-size: 9px;
+    line-height: 1;
+  }
+
+  /* ─── MAP CONTROLS ─── */
+  .leaflet-control-zoom {
+    border: none !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+
+  .leaflet-control-zoom a {
+    background: var(--panel) !important;
+    color: var(--ink) !important;
+    border: 1px solid var(--border) !important;
+    font-size: 16px !important;
+  }
+
+  .leaflet-control-zoom a:hover {
+    background: var(--bg) !important;
+  }
+
+  /* ─── TOOLTIP INFO ─── */
+  .map-hint {
+    position: absolute;
+    bottom: 20px;
+    right: 340px;
+    z-index: 1000;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--muted);
+    pointer-events: none;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ─── BOUTON SUGGÉRER ─── */
+  .suggest-btn {
+    position: absolute;
+    bottom: 24px;
+    left: calc(50% - 160px);
+    z-index: 1000;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 13px 26px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(200,55,43,0.45);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .suggest-btn:hover {
+    background: var(--red-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 26px rgba(200,55,43,0.55);
+  }
+
+  /* ─── MODALE ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,46,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--panel);
+    border-radius: 18px;
+    width: 480px;
+    max-width: 95vw;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 64px rgba(26,26,46,0.3);
+    animation: modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes modalIn {
+    from { opacity:0; transform:scale(0.92) translateY(16px); }
+    to   { opacity:1; transform:scale(1) translateY(0); }
+  }
+
+  .modal-header {
+    padding: 20px 24px 16px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d4e 100%);
+    color: white;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .modal-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .modal-header p { font-size: 12px; opacity: 0.6; font-weight: 300; }
+
+  .modal-close {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.2); }
+
+  .modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.15s;
+    resize: none;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus { border-color: var(--red); }
+  .form-group textarea { height: 90px; }
+
+  .modal-footer {
+    padding: 14px 24px 20px;
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .btn-secondary {
+    flex: 1;
+    padding: 11px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-secondary:hover { background: var(--bg); color: var(--ink); }
+
+  .btn-primary {
+    flex: 2;
+    padding: 11px;
+    border: none;
+    border-radius: 10px;
+    background: var(--red);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary:hover { background: var(--red-light); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: #1a1a2e;
+    color: white;
+    padding: 12px 22px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 3000;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ══════════════════════════════════════
+     RESPONSIVE MOBILE (≤ 768px)
+  ══════════════════════════════════════ */
+  @media (max-width: 768px) {
+
+    body { overflow: hidden; height: 100dvh; }
+
+    /* ─── Header compact ─── */
+    header {
+      height: 52px;
+      padding: 0 14px;
+      gap: 10px;
+    }
+    .logo { width: 32px; height: 32px; font-size: 16px; border-radius: 8px; }
+    .header-title h1 { font-size: 15px; }
+    .header-title p { display: none; }
+    .header-stats { gap: 14px; }
+    .stat-num { font-size: 14px; }
+    .stat-label { font-size: 8px; letter-spacing: 0.3px; }
+
+    /* ─── Layout : carte plein écran ─── */
+    .main { flex-direction: column; }
+    #map { width: 100%; height: 100%; }
+
+    /* ─── Sidebar → panneau glissant depuis le bas ─── */
+    .sidebar {
+      position: fixed;
+      bottom: 56px; /* au-dessus de la bottom nav */
+      left: 0; right: 0;
+      width: 100%;
+      height: 70vh;
+      border-left: none;
+      border-top: 1px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -8px 32px rgba(26,26,46,0.15);
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
+      z-index: 500;
+      display: flex !important;
+    }
+    .sidebar.mobile-open {
+      transform: translateY(0);
+    }
+
+    /* Handle de drag */
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      z-index: 1;
+    }
+
+    .sidebar-header { padding: 28px 16px 14px; }
+    .sidebar-header h2 { font-size: 14px; }
+    .sidebar-header p { font-size: 11px; }
+
+    .sidebar-tabs { flex-shrink: 0; }
+    .sidebar-tab { font-size: 10px; padding: 8px 4px; }
+
+    /* ─── Map hint masqué ─── */
+    .map-hint { display: none; }
+
+    /* ─── Bouton Suggérer ─── */
+    .suggest-btn {
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px;
+      padding: 11px 22px;
+    }
+
+    /* ─── Bottom navigation bar ─── */
+    .bottom-nav {
+      display: flex !important;
+    }
+
+    /* ─── Popups Leaflet → style bottom sheet ─── */
+    .leaflet-popup-content-wrapper {
+      border-radius: 16px !important;
+      box-shadow: 0 8px 32px rgba(26,26,46,0.2) !important;
+    }
+    .leaflet-popup-content {
+      width: 260px !important;
+    }
+
+    /* ─── Toast remonté au-dessus de la bottom nav ─── */
+    .toast { bottom: 72px; }
+  }
+
+  /* ─── Bottom Nav (caché sur desktop) ─── */
+  .bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    z-index: 600;
+    box-shadow: 0 -2px 12px rgba(26,26,46,0.08);
+  }
+  .bottom-nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 6px 0;
+    transition: all 0.15s;
+  }
+  .bottom-nav-btn .nav-icon { font-size: 18px; line-height: 1; }
+  .bottom-nav-btn .nav-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    transition: color 0.15s;
+  }
+  .bottom-nav-btn.active .nav-label { color: var(--red); }
+  .bottom-nav-btn.active .nav-icon { filter: none; }
+</style>
+</head>
+
+<body>
+
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<header>
+  <div class="logo">🗺️</div>
+  <div class="header-title">
+    <h1>CALM à travers l'Europe</h1>
+    <p>6 mois en CALM.ion de l'Europe de l'Est à la Laponie, du mur de Berlin à la Cappadocce en revenant par les Balkans</p>
+  </div>
+  <div class="header-stats">
+    <div class="stat">
+      <div class="stat-num">4</div>
+      <div class="stat-label">Membres <br> d'équipage</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">180</div>
+      <div class="stat-label">Jours</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">27</div>
+      <div class="stat-label">Pays <br> traversés</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">~25 000</div>
+      <div class="stat-label">km <br> estimés</div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<div class="main">
+
+  <!-- MAP -->
+  <div id="map"></div>
+  <div class="map-hint">🔍 Zoom pour voir les points remarquables</div>
+
+  <!-- BOUTON SUGGÉRER -->
+  <button class="suggest-btn" onclick="openModal()">
+    💡 Proposer une idée
+  </button>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="sidebar-header">
+      <h2>CALM à travers l'Europe</h2>
+      <p>Un tour d'Europe complet depuis Ivry-sur-Seine, en passant par l'Allemagne et la Pologne pour rejoindre la Laponie. Retour via les fjords norvégiens, l'Europe de l'Est jusqu'à la Turquie, puis les Balkans.</p>
+      <div class="route-badge">Itinéraire en cours de planification</div>
+    </div>
+
+    <!-- PANNEAU PLANNING -->
+    <div style="flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;" id="tab-planning">
+      <div class="planning-list" id="planningList"></div>
+    </div>
+
+    <div class="legend-box">
+      <div class="legend-title">Légende</div>
+      <div class="legend-items">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#c8372b;"></div>
+          <span>Route du voyage</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#1a1a2e;"></div>
+          <span>Villes étapes</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#c9933a; border-radius:3px;"></div>
+          <span>Lieux remarquables</span>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- ═══ BOTTOM NAV (mobile uniquement) ═══ -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bottom-nav-btn active" id="navMap" onclick="mobileNav('map', this)">
+    <span class="nav-icon">🗺️</span>
+    <span class="nav-label">Carte</span>
+  </button>
+  <button class="bottom-nav-btn" id="navPlanning" onclick="mobileNav('planning', this)">
+    <span class="nav-icon">📅</span>
+    <span class="nav-label">Planning</span>
+  </button>
+  <button class="bottom-nav-btn" id="navIdee" onclick="openModal()">
+    <span class="nav-icon">💡</span>
+    <span class="nav-label">Idée</span>
+  </button>
+</nav>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+<script>
+
+/* ═══ MAP INIT ═══ */
+var map = L.map('map', { zoomControl: true }).setView([50,10], 4);
+
+L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  { attribution:'© OpenStreetMap contributors © CARTO', maxZoom: 19 }
+).addTo(map);
+
+/* ═══ ÉTAPES ═══ */
+var stages = [
+  {name:"Ivry-sur-Seine",     coords:[48.813,2.383],    flag:"🇫🇷"},
+  {name:"Husseren-les-Châteaux", coords:[48.041,7.277], flag:"🇫🇷"},
+  {name:"Feldberg",           coords:[47.873,8.003],    flag:"🇩🇪"},
+  {name:"Lac de Constance",   coords:[47.566,9.374],    flag:"🇩🇪"},
+  {name:"Château de Neuschwanstein", coords:[47.5576,10.7498], flag:"🇩🇪"},
+  {name:"Augsbourg",          coords:[48.3705,10.8978], flag:"🇩🇪"},
+  {name:"Parc national de Šumava", coords:[48.987,13.510], flag:"🇨🇿"},
+  {name:"České Budějovice",   coords:[48.974,14.474],   flag:"🇨🇿"},
+  {name:"Vysoké Tatry",       coords:[49.166,20.267],   flag:"🇸🇰"},
+  {name:"Cracovie",           coords:[50.0647,19.945],  flag:"🇵🇱"},
+  {name:"Vilnius",            coords:[54.687,25.279],   flag:"🇱🇹"},
+  {name:"Riga",               coords:[56.949,24.105],   flag:"🇱🇻"},
+  {name:"Tallinn",            coords:[59.437,24.753],   flag:"🇪🇪"},
+  {name:"Helsinki",           coords:[60.1699,24.9384], flag:"🇫🇮"},
+  {name:"Cap Nord",           coords:[71.1725,25.784],  flag:"🇳🇴"},
+  {name:"Îles Lofoten",       coords:[68.148,13.610],   flag:"🇳🇴"},
+  {name:"Trondheim",          coords:[63.430,10.395],   flag:"🇳🇴"},
+  {name:"Geiranger",          coords:[62.101,7.205],    flag:"🇳🇴"},
+  {name:"Aurlandsfjellet",    coords:[60.905,7.206],    flag:"🇳🇴"},
+  {name:"Göteborg",           coords:[57.7089,11.9746], flag:"🇸🇪"},
+  {name:"Copenhague",         coords:[55.676,12.568],   flag:"🇩🇰"},
+  {name:"Berlin",             coords:[52.5200,13.4050], flag:"🇩🇪"},
+  {name:"Prague",             coords:[50.0755,14.4378], flag:"🇨🇿"},
+  {name:"Bratislava",         coords:[48.1486,17.1077], flag:"🇸🇰"},
+  {name:"Budapest",           coords:[47.4979,19.0402], flag:"🇭🇺"},
+  {name:"Bucarest",           coords:[44.4268,26.1025], flag:"🇷🇴"},
+  {name:"Istanbul",           coords:[41.0082,28.9784], flag:"🇹🇷"},
+  {name:"Cappadoce",          coords:[38.643,34.827],   flag:"🇹🇷"},
+  {name:"Antalya",            coords:[36.8969,30.7133], flag:"🇹🇷"},
+  {name:"Izmir",              coords:[38.4237,27.1428], flag:"🇹🇷"},
+  {name:"Théssalonique",      coords:[40.6401,22.9444], flag:"🇬🇷"},
+  {name:"Sarajevo",           coords:[43.8563,18.4131], flag:"🇧🇦"},
+  {name:"Dubrovnik",          coords:[42.6507,18.0944], flag:"🇭🇷"},
+  {name:"Split",              coords:[43.5081,16.4402], flag:"🇭🇷"},
+  {name:"Lac de Bled",        coords:[46.3625,14.0938], flag:"🇸🇮"},
+  {name:"Dolomites",          coords:[46.410,11.844],   flag:"🇮🇹"}
+];
+
+/* ═══ LIEUX REMARQUABLES ═══ */
+var highlights = [
+
+  {name:"La forêt noire",      coords:[47.896698, 7.953729], image:"https://images.partir.com/PK0DT3ACztZGijM7n--ZxY9MvUU=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/allemagne/allemagne-foret-noire.jpg", desc:"Décor imaginaire recouvert de forêts, de lacs, et d’anciens châteaux", poi:["À compléter"]},
+
+  {name:"Texaspass",      coords:[48.108681,7.651468], image:"https://mein.toubiz.de/api/v1/media/9e7c6012-a7d7-422d-8c30-a324b12e30c8/view", desc:"Col pour entrer dans la forêt noire", poi:["À compléter"]},
+
+  {name:"Gengenbach",     coords:[48.408921,8.008104], image:"https://images.partir.com/NSkNIWDK5aztzWbNsqRszNzfDIw=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/allemagne/allemagne-gengenbach.jpg", desc:"Magnigique centre-ville médiéval", poi:["À compléter"]},
+
+  {name:"Feldberg",       coords:[47.868547,8.033140], image:"https://images.partir.com/ojt7fxmTXVoN2xRWgxuLOBaJAt8=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/allemagne/allemagne-rando-panoramique-2.jpg", desc:"Point culminant de la Forêt-Noire", poi:["À compléter"]},
+
+  {name:"Lac de Constance", coords:[47.630614,9.384420], image:"https://lh3.googleusercontent.com/gps-cs-s/AHVAweoE5qnb7PjOzIY2-sI2y3qOyoJtt66mIXqAfIx6v5hBQEMQ_eniL_Koq56kpRa4oReFNCQazO7Onq82xwtgQPzTP99baPFNJdm4NyY_Wt3F-KriU42fd3rKSA3FyQw6uCH85ho=w426-h240-k-no", desc:"Troisième plus grand lac d'Europe centrale", poi:["À compléter"]},
+
+  {name:"Lindau", coords:[47.577005, 9.689624], image:"https://images.partir.com/WKzkGULP5XGowPpoEvo857YR8-w=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/allemagne/allemagne-lindau.jpg", desc:"Ile pittoresque sur le Lac de Constance", poi:["À compléter"]},
+
+  {name:"Neuschwanstein", coords:[47.551402,10.752743], image:"https://lh3.googleusercontent.com/gps-cs-s/AHVAweoJWYcDN91s1Zeeo2bSZ_uqIC4ReDKuHdQ8aJh6PgGbPjQ-gnmFCZ7gAoPD4loWOoy4WWee-5DH1nLGG1kdsH7Vez42CH0uXtiRJRol7GO9KbB6VlJwYFQaUXtxwCM0DTYy9m-lXA=w408-h306-k-no", desc:"Château de conte de fées du roi Louis II", poi:["À compléter"]},
+
+  {name:"Ratisbonne",     coords:[49.013454,12.108964], image:"https://images.partir.com/-rcvbf9JmU5U3p41MpyweXV6Iz4=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/allemagne/allemagne-ratisbonne.jpg", desc:"Vieille ville médiévale classée UNESCO", poi:["À compléter"]},
+
+  {name:"Parc de Šumava", coords:[48.983835,13.638901], image:"https://images.partir.com/HNe3PcXYKnURfxFrOGsFJkJ6KFA=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/republique-tcheque/republique-tcheque-parc-sumava.jpg", desc:"Grande forêt naturelle de Bohême", poi:["À compléter"]},
+
+  {name:"Český Krumlov", coords:[48.812478,14.314014], image:"https://images.partir.com/Jr-Q-yyPStAK_s8_qTLXouQrPxc=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/republique-tcheque/republique-tcheque-cesky-krumlov.jpg", poi:["À compléter"]},
+
+  {name:"České Budějovice", coords:[48.978273,14.473893], image:"https://images.partir.com/n7I-Z9y-W-5VB7T7v8H1GPsSDus=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/republique-tcheque/republique-tcheque-ceske-budejovice-3.jpg", desc:"Ville de bière Budweiser originale", poi:["À compléter"]},
+
+  {name:"Zvíkov", coords:[48.981671, 14.614465], image:"https://images.partir.com/ceKMgX3enRdzKHzMnXbJyBM0mm4=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/republique-tcheque/republique-tcheque-zvikov.jpg", desc:"Une forteresse médiévale majestueuse offrant une vue imprenable sur la rivière et les alentours", poi:["À compléter"]},
+
+  {name:"Telc", coords:[49.184180,15.452750], image:"https://images.partir.com/sxcEEXG44IBEtbvtZDjeKfSY9p4=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/republique-tcheque/republique-tcheque-telc.jpg", desc:"Magnifique place de Telč et ses bâtiments colorés", poi:["À compléter"]},
+
+  {name:"Horloge astronomique de Stara Bystrica", coords:[49.346100, 18.936800], image:"https://images.partir.com/HcE3NXrWddL3gTZ1jPlJ-xooJjg=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/slovaquie/slovaquie-secret-stara-bystrica.jpg", desc:"Observer l'horloge astronomique et ses différentes fonctionnalités", poi:["À compléter"]},
+
+  {name:"Hautes Tatras",   coords:[49.166600, 20.131600], image:"https://images.partir.com/IAfBdpWH0sWOVjkfWOJYK4qomMA=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/slovaquie/slovaquie-tatras.jpg", desc:"Massif alpin au cœur des Carpates", poi:["À compléter"]},
+
+  {name:"Parc national des Tatras",   coords:[49.299200, 19.949600], image:"https://images.partir.com/O82uB5Ubm0d3_IdLvpK7KW0rcUk=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/pologne/pologne-zakopane-4.jpg", desc:"Des sentiers qui longent des lacs aux eaux limpides comme celui de Czarny Staw Gąsienicowy, traversant des vallées verdoyantes ou vous amenant vers des grottes... ", poi:["À compléter"]},
+
+  {name:"Mines de Wieliczka", coords:[49.983664,20.055510], image:"https://images.partir.com/_QAwF99AkC6skJH5JguH1RwscIg=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/pologne/pologne-mines-sel-wieliczka.jpg", desc:"Mines de sel classées au patrimoine UNESCO", poi:["À compléter"]},
+
+  {name:"Cracovie", coords:[50.064700, 19.945000], image:"https://images.partir.com/MC5ZHXcXJk-Kmq5OcDDRThEknEI=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/pologne/pologne-cracovie.jpg", desc:"Ville riche en culture et patrimoine", poi:["À compléter"]},
+
+  {name:"Parc national de Bialowieza", coords:[52.700700, 23.867700], image:"https://images.partir.com/cAu3ZrPYxZD1lNfpft10_iPFtvc=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/pologne/pologne-parc-bialowieza-4.jpg", desc:"Une faune et une flore riche", poi:["À compléter"]},
+
+  {name:"Parc national de la Biebrza", coords:[53.473620, 22.657349], image:"https://images.partir.com/Nbreu8GCAVrEAlXyq1hy2GH1CVo=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/pologne/pologne-parc-biebrza-3.jpg", desc:"Observez les nombreux oiseaux migrateurs", poi:["À compléter"]},
+
+  {name:"Le Château de Trakai", coords:[54.637830, 24.934330], image:"https://images.partir.com/s_qXhES-UdiKWPALqdGdjP-JLYQ=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/lituanie/lituanie-chateau-trakai.jpg", desc:"Unique château insulaire médiéval de toute l'Europe de l'Est", poi:["À compléter"]},
+
+  {name:"Vilnius", coords:[54.689160, 25.279800], image:"https://images.partir.com/dotXnh0bChbsXnhzBndYjnb9D0k=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/lituanie/lituanie-vilnius.jpg", desc:"Surnommée la perle baroque de la Baltique", poi:["À compléter"]},
+
+  {name:"L’Isthme de Courlande", coords:[55.308600, 20.996510], image:"https://images.partir.com/jhp3gsSmnbEYCB_kfZgG9dtiKcA=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/lituanie/lituanie-isthme-courlande.jpg", desc:"Entre dunes, lagunes et pinèdes, le parc national de l'Isthme de Courlande est un vrai paradis naturel en bordure de la mer Baltique", poi:["À compléter"]},
+
+  {name:"Parc national de Žemaitija", coords:[56.023800, 21.532000], image:"https://images.partir.com/Nyg9OmrP-a-z5se7C49AK5ZCaLA=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/lituanie/lituanie-parc-zemaitija.jpg", desc:"C’est le genre de forêts mystiques avec des histoires de fantômes, de diables et de trésors", poi:["À compléter"]},
+
+  {name:"Riga", coords:[56.965371, 24.104660], image:"https://images.partir.com/ZAYFA1HkpkvKgaqdZc5Df6FdMZA=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/lettonie/lettonie-riga.jpg", desc:"Située en bord de mer, la ville est d’une beauté inespérée", poi:["À compléter"]},
+
+  {name:"Châteaux de Sigulda et Turaida", coords:[57.182528, 24.850074], image:"https://images.partir.com/N92d_iM8p-QqDX5Bntcf4stHFRg=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/lettonie/lettonie-sigulda-turaida.jpg", desc:"Pénétrez dans ce château, superbement restauré et niché sur les hauteurs de Sigulda depuis 1274", poi:["À compléter"]},
+
+  {name:"Parc national de Gauja", coords:[57.332069, 25.212306], image:"https://images.partir.com/28q502NYJKW7Ts3O37jGQIl-lDY=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/lettonie/lettonie-parc-gauja.jpg", desc:"Pour vivre une échappée dans l’authentique nature lettonne, le Parc national de Gauja sera votre sésame", poi:["À compléter"]},
+
+  {name:"Parc national de Soomaa", coords:[58.333330, 25.000000], image:"https://images.partir.com/t0QblEeliowhJUsyrcsrDG7oi7M=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/estonie/estonie-incontournables-sooma.jpg", desc:"Soomaa mérite un petit séjour nature où des animaux comme le castor sont rois", poi:["À compléter"]},
+
+  {name:"Lahemaa", coords:[59.545800, 25.804960], image:"https://images.partir.com/sXSTdz9jZcXXS8gYNlyiY08NtVI=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/estonie/estonie-incontournables-lahemaa.jpg", desc:"parc national de Lahemaa, qui signifie « pays des baies », est un véritable petit paradis de 725 km² de paysages variés", poi:["À compléter"]},
+
+  {name:"Tallinn", coords:[59.436960, 24.753530], image:"https://images.partir.com/3it6XgmFID4DCsnCN0QFXEpdfNQ=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/estonie/estonie-incontournables-tallinn.jpg", desc:"Tallinn est une petite capitale au charme fou", poi:["À compléter"]},
+
+
+];
+
+/* ═══ GROUPES DE CALQUES ═══ */
+var cityMarkers = L.layerGroup();
+var poiMarkers  = L.layerGroup();
+
+/* ═══ CRÉATION ICÔNES ═══ */
+function makeCityIcon(size) {
+  return L.divIcon({
+    html: '<div class="city-marker" style="width:' + size + 'px;height:' + size + 'px;"></div>',
+    className: '',
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2]
+  });
+}
+
+function makePoiIcon(size) {
+  return L.divIcon({
+    html: '<div class="poi-marker" style="width:' + size + 'px;height:' + size + 'px; font-size:' + Math.round(size*0.55) + 'px;"></div>',
+    className: '',
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2]
+  });
+}
+
+/* ═══ POPUP BUILDER ═══ */
+function buildPopup(p) {
+  var html = '<div class="popup">';
+  if (p.image) {
+    html += '<img class="popup-img" src="' + p.image + '" onerror="this.style.display=\'none\'">';
+  }
+  html += '<div class="popup-body">';
+  html += '<h3>' + p.name + '</h3>';
+  if (p.desc) html += '<p>' + p.desc + '</p>';
+  if (p.poi && p.poi.length) {
+    html += '<ul>';
+    p.poi.forEach(function(i) { html += '<li>' + i + '</li>'; });
+    html += '</ul>';
+  }
+  html += '</div></div>';
+  return html;
+}
+
+/* ═══ AJOUT VILLES ═══ */
+var cityMarkerRefs = [];
+stages.forEach(function(p, idx) {
+  var m = L.marker(p.coords, { icon: makeCityIcon(12) })
+    .bindPopup(buildPopup(p), { maxWidth: 240 });
+  cityMarkers.addLayer(m);
+  cityMarkerRefs.push({ marker: m, data: p, index: idx });
+});
+
+/* ═══ AJOUT POI ═══ */
+var poiMarkerRefs = [];
+highlights.forEach(function(p) {
+  var m = L.marker(p.coords, { icon: makePoiIcon(14) })
+    .bindPopup(buildPopup(p), { maxWidth: 240 });
+  poiMarkers.addLayer(m);
+  poiMarkerRefs.push({ marker: m, data: p });
+});
+
+map.addLayer(cityMarkers);
+map.addLayer(poiMarkers);
+
+/* ═══ MISE À JOUR TAILLE DES MARQUEURS SELON ZOOM ═══ */
+function updateMarkerSizes() {
+  var zoom = map.getZoom();
+
+  // Villes — taille variable selon zoom
+  var citySize = 10;
+  if (zoom >= 5) citySize = 12;
+  if (zoom >= 6) citySize = 16;
+  if (zoom >= 8) citySize = 20;
+  if (zoom >= 10) citySize = 26;
+
+  cityMarkerRefs.forEach(function(ref) {
+    ref.marker.setIcon(makeCityIcon(citySize));
+  });
+
+  // POI — même taille fixe que les villes, toujours visibles
+  poiMarkerRefs.forEach(function(ref) {
+    ref.marker.setIcon(makePoiIcon(citySize));
+  });
+}
+
+map.on('zoomend', updateMarkerSizes);
+
+/* ═══ TRACÉ ROUTE ═══ */
+var routeCoords = [
+[48.807381,2.369659],[48.732231,3.920274],[48.635994,4.92217],[48.682030,6.118574],
+[48.455245,6.754794],[48.088683,6.902125],[48.035061,7.279741],[48.029482,7.595003],
+[48.108681,7.651468],[48.472866,7.908234],[48.130259,8.235041],[47.923475,8.188005],
+[47.858956,8.036624],[47.840212,9.035729],[47.698776,9.271740],[47.575295,9.727677],
+[47.686212,10.363561],[47.556127,10.740210],[47.837872,10.891509],[48.369603,10.895272],
+[48.610761,11.658497],[49.203283,12.337878],[49.160583,13.273660],[48.737241,14.107785],
+[48.974299,14.481938],[49.380363,14.721741],[49.526770,15.347961],[48.909641,17.990173],
+[49.226344,18.654846],[49.071357,20.275330],[49.984884,20.073880],[50.064011,19.944448],
+[52.140034,20.988230],[52.689508,23.855662],[53.822055,22.948734],[54.580338,24.157230],
+[54.633917,24.912540],[54.687416,25.279281],[55.022725,26.046993],[55.344977,26.073086],
+[55.061167,24.167072],[55.694526,21.207270],[55.914942,21.080699],[56.028333,21.833885],
+[56.698806,22.517251],[56.953964,24.103301],[57.328420,25.222555],[57.549595,25.379209],
+[58.190575,25.055850],[58.328038,25.304085],[58.485463,24.980726],[59.277484,24.740554],
+[59.492889,25.476638],[59.434386,24.768648],[60.177430,24.929724],[61.884329,27.765983],
+[63.108921,29.660411],[64.285964,28.013352],[66.352412,29.293724],[66.793260,27.331657],
+[67.425680,26.584587],[68.677785,27.485466],[68.912238,27.046012],[68.765497,26.298942],
+[69.135495,27.182371],[69.473274,25.512449],[71.173859,25.776121],[70.473097,25.059309],
+[69.929832,23.103742],[70.113843,22.927961],[69.882737,21.983137],[69.751968,20.505476],
+[69.187549,19.697980],[69.312105,17.714948],[68.995415,18.514622],[68.533840,17.196262],
+[67.880802,12.978333],[68.214943,14.548404],[68.010751,15.308750],[68.112012,15.842577],
+[68.009394,16.023852],[67.600948,15.930168],[67.090193,15.374905],[66.500182,14.921729],
+[65.871684,13.208013],[65.356769,13.323492],[65.322077,12.635234],[65.504657,12.298034],
+[65.397185,12.085551],[64.304826,12.283226],[63.776470,11.461784],[63.433119,10.403634],
+[63.107555,7.785827],[63.002900,7.296194],[62.559227,7.693444],[62.613883,7.126717],
+[62.466968,6.824593],[62.100354,7.206368],[61.955476,6.467596],[61.857177,6.810919],
+[61.867540,6.582953],[61.565612,6.473089],[61.092550,7.522284],[60.910134,7.181707],
+[61.154184,8.678502],[60.880030,10.903234],[61.354957,12.666539],[61.643285,12.732457],
+[60.707425,13.710654],[59.110383,13.007529],[57.702895,12.000535],[56.624860,12.927634],
+[56.074559,12.775201],[55.602496,12.992303],[55.674310,12.570577],[55.373268,11.255060],
+[55.379511,10.293756],[55.600473,9.579644],[56.155121,10.183893],[55.517624,9.411466],
+[54.811616,9.307194],[54.028669,9.953913],[53.950276,10.272226],[53.558632,10.407996],
+[53.344018,11.822879],[52.762908,12.812554],[52.521677,13.406493],[51.844391,13.917964],
+[51.138642,13.749935],[51.158210,13.959188],[51.063235,13.938402],[50.992057,14.105847],
+[50.887606,14.233953],[50.674842,14.174853],[50.299086,14.514456],[50.076501,14.436771],
+[49.876260,15.475902],[49.170279,15.607967],[48.469539,16.835391],[48.143953,16.906191],
+[48.148143,17.104719],[47.491679,19.042444],[47.877326,20.875340],[47.945055,22.397016],
+[47.684494,23.731960],[47.807398,24.058910],[47.550932,24.520248],[47.630505,24.462894],
+[47.441918,25.300842],[47.551149,25.878240],[47.265253,25.671741],[47.087636,25.962438],
+[46.802213,25.492097],[46.292289,25.034821],[45.798108,25.597179],[45.487032,25.240124],
+[45.847487,24.960551],[45.709567,24.257426],[45.069188,24.405741],[45.141795,24.618915],
+[44.427848,26.102095],[43.846397,25.986917],[43.521651,26.541647],[43.230901,26.552968],
+[42.877949,26.443532],[42.653548,26.673726],[41.955829,26.598252],[41.688666,26.585826],
+[41.117454,28.173360],[40.980746,28.964376],[40.741998,32.136558],[39.211106,33.163618],
+[38.501024,34.361128],[38.663872,34.835535],[37.770908,32.364993],[37.731819,32.073855],
+[36.734678,31.606936],[36.892997,30.728030],[36.490066,30.453636],[36.240853,29.811570],
+[36.311606,29.317317],[36.661327,29.146755],[36.958446,29.151943],[37.262644,29.466080],
+[37.913406,29.116041],[37.794955,28.053471],[37.936987,27.348304],[38.026317,27.446448],
+[38.240196,27.228094],[38.426557,27.147070],[39.062740,27.021534],[39.549631,26.963271],
+[39.609506,26.407822],[39.961715,26.260221],[40.411828,26.752261],[40.278047,28.932515],
+[40.790599,29.486817],[41.163190,28.506293],[40.884782,25.768992],[41.079684,24.862620],
+[40.693469,22.978465],[40.558665,22.585000],[40.359174,21.821744],[40.069976,21.437203],
+[39.930127,21.575094],[39.719817,21.615878],[39.820940,21.324806],[39.683510,20.888699],
+[39.893505,20.606488],[39.933532,20.201367],[39.933532,20.201367],[39.763975,19.999580],
+[39.918440,20.185895],[40.080483,20.142625],[39.877993,20.026966],[40.214468,19.567480],
+[40.468057,19.521972],[40.512966,19.792510],[40.267164,20.049316],[40.274499,20.277282],
+[40.435661,20.280029],[40.770829,19.884598],[41.094526,20.016434],[41.353946,19.770128],
+[41.443995,19.866613],[41.474059,20.089070],[41.578668,20.485165],[41.519036,20.546369],
+[41.582123,20.621430],[41.720182,20.665313],[41.656367,20.734600],[42.000525,20.995252],
+[42.003100,21.412133],[42.292156,21.195968],[42.808110,21.165756],[42.821240,21.315086],
+[42.971678,20.347795],[43.696852,19.674883],[43.818225,18.997689],[43.856205,18.411949],
+[44.139359,18.037831],[44.143301,17.392384],[44.334173,17.266042],[43.939564,17.589711],
+[43.628248,17.633656],[43.662198,17.759258],[43.500408,17.749548],[43.407358,17.883555],
+[43.342628,17.805858],[43.191402,18.499813],[42.856076,18.906307],[43.099219,19.095821],
+[42.897871,19.080688],[42.898284,18.959524],[42.812713,18.896353],[42.574505,19.054281],
+[42.462151,19.234182],[42.384394,19.099575],[42.387253,18.933505],[42.302563,18.932534],
+[42.315509,18.855688],[42.251860,18.898704],[42.281281,18.820566],[42.378300,18.750072],
+[42.424950,18.799783],[42.486727,18.765223],[42.487234,18.695872],[42.517101,18.691065],
+[42.489259,18.649867],[42.478625,18.683855],[42.438605,18.607981],[42.455832,18.500864],
+[42.563681,18.247963],[42.617771,18.215691],[42.649596,18.094155],[42.896908,17.568595],
+[43.161935,17.467341],[43.589277,16.640979],[43.515894,16.441737],[43.582723,16.527889],
+[43.954651,16.082138],[44.020885,16.123302],[44.247003,16.070876],[44.296170,15.870375],
+[44.412040,15.889601],[44.768025,15.694594],[45.402229,15.248582],[45.475816,15.438911],
+[45.831488,15.159244],[46.039494,14.444542],[46.356741,14.126033],[46.513227,13.314342],
+[46.329572,13.058910],[45.895451,13.281383],[45.790217,12.830943],[45.945129,12.622203],
+[45.880156,12.347545],[46.394016,11.842174],[46.682631,11.110615],[46.644591,10.593267],
+[47.350271,10.810369],[48.446523,9.983535],[48.964732,8.445347],[48.571991,6.509910],
+[48.812871,2.366504]
+];
+
+var line = L.polyline(routeCoords, {
+  color: '#c8372b',
+  weight: 3.5,
+  opacity: 0.85
+}).addTo(map);
+
+map.fitBounds(line.getBounds(), { padding: [20, 20] });
+
+/* ═══ FLÈCHES MAISON SUR LE TRACÉ ═══ */
+var arrowLayer = L.layerGroup().addTo(map);
+
+function latLngToPoint(latlng) {
+  return map.latLngToContainerPoint(latlng);
+}
+
+function drawArrows() {
+  arrowLayer.clearLayers();
+  var zoom = map.getZoom();
+  // Espacement en pixels entre flèches
+  var spacing = 120;
+  var arrowSize = Math.max(6, Math.min(14, zoom * 1.2));
+
+  var accumulated = 0;
+  for (var i = 1; i < routeCoords.length; i++) {
+    var p1 = map.latLngToContainerPoint(routeCoords[i-1]);
+    var p2 = map.latLngToContainerPoint(routeCoords[i]);
+    var dx = p2.x - p1.x;
+    var dy = p2.y - p1.y;
+    var segLen = Math.sqrt(dx*dx + dy*dy);
+    if (segLen < 1) continue;
+
+    var remaining = accumulated;
+    while (remaining < segLen) {
+      var t = remaining / segLen;
+      var px = p1.x + dx * t;
+      var py = p1.y + dy * t;
+      var angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+      // Flèche SVG via divIcon
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + (arrowSize*2) + '" height="' + (arrowSize*2) + '" viewBox="-10 -10 20 20">' +
+        '<polygon points="0,-7 6,5 0,2 -6,5" fill="#c8372b" opacity="0.9" transform="rotate(' + (angle + 90) + ')"/>' +
+        '</svg>';
+
+      var latlng = map.containerPointToLatLng([px, py]);
+      var icon = L.divIcon({
+        html: svg,
+        className: '',
+        iconSize: [arrowSize*2, arrowSize*2],
+        iconAnchor: [arrowSize, arrowSize]
+      });
+      L.marker(latlng, { icon: icon, interactive: false, keyboard: false }).addTo(arrowLayer);
+
+      remaining += spacing;
+    }
+    accumulated = remaining - segLen;
+  }
+}
+
+map.on('moveend zoomend', drawArrows);
+map.on('load', drawArrows);
+setTimeout(drawArrows, 300); // after initial fitBounds
+
+/* ═══ SIDEBAR – ONGLETS ═══ */
+/* ═══ PLANNING PAR PAYS ═══ */
+var planning = [
+  {
+    flagCode: 'fr', country: 'France', duration: 3, dates: '07/07 -> 10/07',
+    note: 'Départ depuis Ivry-sur-Seine, traversée de la France jusqu\'en Alsace.',
+    stops: ['Ivry-sur-Seine — départ', 'Husseren-les-Châteaux']
+  },
+  {
+    flagCode: 'de', country: 'Allemagne', duration: 7, dates: 'À définir',
+    note: 'Forêt-Noire, Lac de Constance, Neuschwanstein, Ratisbonne.',
+    stops: ['Feldberg & Forêt-Noire', 'Lac de Constance / Lindau', 'Neuschwanstein', 'Augsbourg', 'Ratisbonne']
+  },
+  {
+    flagCode: 'cz', country: 'République tchèque', duration: 6, dates: 'À définir',
+    note: 'Parc de Šumava, Český Krumlov, Telč, České Budějovice.',
+    stops: ['Parc national de Šumava', 'Český Krumlov', 'České Budějovice', 'Zvíkov', 'Telč']
+  },
+  {
+    flagCode: 'sk', country: 'Slovaquie', duration: 4, dates: 'À définir',
+    note: 'Hautes Tatras, Stara Bystrica.',
+    stops: ['Horloge astronomique de Stara Bystrica', 'Hautes Tatras', 'Parc national des Tatras']
+  },
+  {
+    flag: '🇵🇱', country: 'Pologne', duration: 7, dates: 'À définir',
+    note: 'Cracovie, mines de Wieliczka, forêts de Białowieża et Biebrza.',
+    stops: ['Mines de Wieliczka', 'Cracovie', 'Parc de Białowieża', 'Parc de Biebrza']
+  },
+  {
+    flag: '🇱🇹', country: 'Lituanie', duration: 4, dates: 'À définir',
+    note: 'Vilnius la baroque, château de Trakai, isthme de Courlande.',
+    stops: ['Château de Trakai', 'Vilnius', 'Isthme de Courlande']
+  },
+  {
+    flag: '🇱🇻', country: 'Lettonie', duration: 3, dates: 'À définir',
+    note: 'Riga et sa vieille ville Art Nouveau.',
+    stops: ['Riga']
+  },
+  {
+    flag: '🇪🇪', country: 'Estonie', duration: 3, dates: 'À définir',
+    note: 'Tallinn médiévale, perle de la Baltique.',
+    stops: ['Tallinn']
+  },
+  {
+    flag: '🇫🇮', country: 'Finlande', duration: 5, dates: 'À définir',
+    note: 'Helsinki, puis remontée vers la Laponie.',
+    stops: ['Helsinki', 'Remontée vers le nord']
+  },
+  {
+    flag: '🇳🇴', country: 'Norvège', duration: 25, dates: 'À définir',
+    note: 'Cap Nord, Îles Lofoten, fjords de Geiranger et Aurlandsfjellet.',
+    stops: ['Cap Nord', 'Îles Lofoten', 'Trondheim', 'Geiranger', 'Aurlandsfjellet']
+  },
+  {
+    flag: '🇸🇪', country: 'Suède', duration: 3, dates: 'À définir',
+    note: 'Descente vers Göteborg.',
+    stops: ['Göteborg']
+  },
+  {
+    flag: '🇩🇰', country: 'Danemark', duration: 3, dates: 'À définir',
+    note: 'Copenhague et sa douceur de vivre.',
+    stops: ['Copenhague']
+  },
+  {
+    flag: '🇩🇪', country: 'Allemagne (retour)', duration: 2, dates: 'À définir',
+    note: 'Berlin incontournable.',
+    stops: ['Berlin']
+  },
+  {
+    flag: '🇨🇿', country: 'Rép. tchèque (retour)', duration: 2, dates: 'À définir',
+    note: 'Prague, cent clochers.',
+    stops: ['Prague']
+  },
+  {
+    flag: '🇸🇰🇭🇺', country: 'Slovaquie / Hongrie', duration: 3, dates: 'À définir',
+    note: 'Bratislava puis Budapest.',
+    stops: ['Bratislava', 'Budapest']
+  },
+  {
+    flag: '🇷🇴', country: 'Roumanie', duration: 5, dates: 'À définir',
+    note: 'Transylvanie, Bucarest.',
+    stops: ['Bucarest']
+  },
+  {
+    flag: '🇹🇷', country: 'Turquie', duration: 14, dates: 'À définir',
+    note: 'Istanbul, Cappadoce, côte turquoise, Izmir.',
+    stops: ['Istanbul', 'Cappadoce', 'Antalya', 'Izmir']
+  },
+  {
+    flag: '🇬🇷', country: 'Grèce', duration: 4, dates: 'À définir',
+    note: 'Théssalonique en remontant vers les Balkans.',
+    stops: ['Théssalonique']
+  },
+  {
+    flag: '🇧🇦🇭🇷🇸🇮', country: 'Balkans', duration: 10, dates: 'À définir',
+    note: 'Sarajevo, Dubrovnik, Split, Lac de Bled.',
+    stops: ['Sarajevo', 'Dubrovnik', 'Split', 'Lac de Bled']
+  },
+  {
+    flag: '🇮🇹', country: 'Italie (retour)', duration: 3, dates: 'À définir',
+    note: 'Dolomites avant de rentrer.',
+    stops: ['Dolomites']
+  },
+  {
+    flag: '🇫🇷', country: 'France (retour)', duration: 1, dates: 'À définir',
+    note: 'Retour à Ivry-sur-Seine.',
+    stops: ['Ivry-sur-Seine — arrivée']
+  }
+];
+
+var planningList = document.getElementById('planningList');
+
+planning.forEach(function(p, idx) {
+  var block = document.createElement('div');
+  block.className = 'country-block';
+
+  var stopsHtml = p.stops.map(function(s) {
+    return '<div class="country-stop"><div class="stop-dot"></div><span>' + s + '</span></div>';
+  }).join('');
+
+  block.innerHTML =
+    '<div class="country-header" onclick="toggleCountry(this)">' +
+    '<img class="country-flag" src="https://flagcdn.com/32x24/' + p.flagCode + '.png" alt="">' +
+      '<div class="country-info">' +
+        '<div class="country-name">' + p.country + '</div>' +
+        '<div class="country-dates">' + p.dates + '</div>' +
+      '</div>' +
+      '<div class="country-duration">' + p.duration + '<span>jours</span></div>' +
+      '<div class="country-chevron">▶</div>' +
+    '</div>' +
+    '<div class="country-details">' +
+      '<p class="country-note">' + p.note + '</p>' +
+      '<div class="country-stops">' + stopsHtml + '</div>' +
+    '</div>';
+
+  planningList.appendChild(block);
+});
+
+function toggleCountry(header) {
+  var block = header.parentElement;
+  block.classList.toggle('open');
+}
+
+/* ═══ Init taille marqueurs ═══ */
+updateMarkerSizes();
+
+/* ═══════════════════════════════
+   MODALE SUGGESTIONS
+═══════════════════════════════ */
+
+// ⚙️ GOOGLE SHEETS — remplace cette URL par ton URL de déploiement Apps Script
+var GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyzIMRC8dTGNWNrwaXohVwOZ1FmtrmVeYcdt9YlqtdW_9X6tibr5lqI8opEtSWZkTRnJA/exec';
+
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('inputName').value = '';
+  document.getElementById('inputPlace').value = '';
+  document.getElementById('inputDesc').value = '';
+  document.getElementById('sendStatus').textContent = '';
+  document.getElementById('btnSend').disabled = false;
+  document.getElementById('btnSend').textContent = '📨 Envoyer mon idée';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3500);
+}
+
+async function sendSuggestion() {
+  var name  = document.getElementById('inputName').value.trim();
+  var place = document.getElementById('inputPlace').value.trim();
+  var desc  = document.getElementById('inputDesc').value.trim();
+
+  if (!place) {
+    document.getElementById('sendStatus').textContent = '⚠️ Indique un lieu avant d\'envoyer.';
+    return;
+  }
+
+  var btn = document.getElementById('btnSend');
+  var status = document.getElementById('sendStatus');
+  btn.disabled = true;
+  btn.textContent = '⏳ Envoi…';
+  status.textContent = '';
+
+  var payload = {
+    prenom: name || 'Anonyme',
+    lieu: place,
+    description: desc,
+    date: new Date().toLocaleString('fr-FR')
+  };
+
+  try {
+    if (GOOGLE_SHEET_URL === 'REMPLACER_PAR_TON_URL_APPS_SCRIPT') {
+      // Mode démo sans sheet configuré
+      await new Promise(r => setTimeout(r, 800));
+      closeModal();
+      showToast('🎉 Merci ' + payload.prenom + ' ! Idée reçue : ' + place);
+      return;
+    }
+
+    await fetch(GOOGLE_SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    closeModal();
+    showToast('🎉 Merci ' + payload.prenom + ' ! Ton idée a bien été enregistrée.');
+
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = '📨 Envoyer mon idée';
+    status.textContent = '❌ Erreur d\'envoi, réessaie.';
+  }
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeModal();
+    if (window.innerWidth <= 768) mobileNav('map', document.getElementById('navMap'));
+  }
+});
+
+/* ═══ NAVIGATION MOBILE ═══ */
+function mobileNav(tab, btn) {
+  var sidebar = document.querySelector('.sidebar');
+  var suggestBtn = document.querySelector('.suggest-btn');
+
+  // Mettre à jour les boutons actifs
+  document.querySelectorAll('.bottom-nav-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  btn.classList.add('active');
+
+  if (tab === 'map') {
+    // Fermer sidebar, afficher bouton suggérer
+    sidebar.classList.remove('mobile-open');
+    if (suggestBtn) suggestBtn.style.display = '';
+    // Invalider la carte pour recalculer sa taille
+    setTimeout(function() { map.invalidateSize(); drawArrows(); }, 360);
+  } else {
+    // Ouvrir sidebar sur le bon onglet
+    sidebar.classList.add('mobile-open');
+    if (suggestBtn) suggestBtn.style.display = 'none';
+
+    // Activer le bon onglet dans la sidebar
+    document.querySelectorAll('.sidebar-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+
+    var targetTab = 0;
+    document.querySelectorAll('.sidebar-tab')[targetTab].classList.add('active');
+    document.querySelectorAll('.tab-panel')[targetTab].classList.add('active');
+  }
+}
+
+/* ─── Swipe down pour fermer la sidebar ─── */
+(function() {
+  var sidebar = document.querySelector('.sidebar');
+  var startY = 0;
+  sidebar.addEventListener('touchstart', function(e) {
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  sidebar.addEventListener('touchend', function(e) {
+    var dy = e.changedTouches[0].clientY - startY;
+    if (dy > 60) {
+      mobileNav('map', document.getElementById('navMap'));
+    }
+  }, { passive: true });
+})();
+
+</script>
+
+<!-- ═══ MODALE ═══ -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-text">
+        <h3>💡 Proposer une idée</h3>
+        <p>Un lieu à ne pas manquer sur notre route ? Dis-nous tout !</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Ton prénom</label>
+        <input type="text" id="inputName" placeholder="Ex : Marie" maxlength="40"/>
+      </div>
+      <div class="form-group">
+        <label>Lieu ou idée suggéré(e) *</label>
+        <input type="text" id="inputPlace" placeholder="Ex : Les mines de sel de Wieliczka" maxlength="120"/>
+      </div>
+      <div class="form-group">
+        <label>Description / pourquoi y aller ?</label>
+        <textarea id="inputDesc" placeholder="Ce qu'on peut y voir, faire, manger… toutes les infos utiles !"></textarea>
+      </div>
+      <div id="sendStatus" style="font-size:13px;color:var(--red);min-height:18px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Annuler</button>
+      <button class="btn-primary" id="btnSend" onclick="sendSuggestion()">📨 Envoyer mon idée</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+</body>
+</html>
