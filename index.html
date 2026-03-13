@@ -290,6 +290,20 @@
     gap: 6px;
     font-size: 12px;
     color: var(--ink);
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 5px;
+    transition: background 0.15s, color 0.15s;
+    margin-left: -4px;
+  }
+
+  .country-stop:hover {
+    background: rgba(201,147,58,0.12);
+    color: var(--gold);
+  }
+
+  .country-stop:hover .stop-dot {
+    background: var(--red);
   }
 
   .stop-dot {
@@ -1079,11 +1093,43 @@ var highlights = [
 
   {name:"Parc national Llogara", coords:[40.218014, 19.564308], image:"https://images.partir.com/c_gYZeS2HOV6KDwYzO_Xkt14ufc=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/albanie/albanie-parc-llogara.jpg", desc:" Sanctuaire privilégié de la randonnée, le parc national de Llogara renferme une nature verdoyante et indomptée", poi:["À compléter"]},
 
+  {name:"Osum Canyon", coords:[40.499599, 20.227419], image:"https://images.partir.com/-6F576Zadki71-J8HIxGBEss19E=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/albanie/albanie-osum-canyon.jpg", desc:" Parois parfaitement verticales, hauteur saisissante, rivière vert émeraude en contrebas", poi:["À compléter"]},
 
+  {name:"Lake Bovilla", coords:[41.445789, 19.898893], image:"https://images.partir.com/L2qc9wU3VsGrmiyPtTEQEYmiNxs=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/albanie/albanie-lake-bovilla.jpg", desc:" Découvrez la beauté naturelle de Lake Bovilla lors d'une promenade en bateau", poi:["À compléter"]},
 
+  {name:"Parc national de Mavrovo", coords:[41.637240, 20.666860], image:"https://images.partir.com/roNqvsmwW0GdilaooN_4hGzEjDA=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/macedoine/macedoine-mavrovo.jpg", desc:" Le parc national de Mavrovo s’étire au nord-ouest de la Macédoine le long de la frontière albanaise", poi:["À compléter"]},
 
+  {name:"Skopje", coords:[41.996460, 21.431410], image:"https://images.partir.com/91SUV5-VuhI5JhLneZDLyWpTO1I=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/macedoine/macedoine-skopje.jpg", desc:" Peuplée de seulement un demi-million d’habitants, la petite capitale de la Macédoine est loin d’être l’une des métropoles européennes les plus fréquentées", poi:["À compléter"]},
 
+  {name:"Le lac de Batlava", coords:[42.818392, 21.312405], image:"https://images.partir.com/rKrGxsvsTGIvTFemYcOamo6QiiA=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/kosovo/kosovo-lac-batlava.jpg", desc:" Tout proche de la capitale, le lac de Batlava est une station balnéaire très appréciée des Kosovars", poi:["À compléter"]},
 
+  {name:"Sarajevo", coords:[43.485400, 18.356440], image:"https://images.partir.com/jdmjsW4OmHnpUPqteFsgh-6Ob1Q=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/bosnie-herzegovine/bosnie-sarajevo.jpg", desc:" Sarajevo : Carrefour Culturel", poi:["À compléter"]},
+
+  {name:"Jajce", coords:[44.342030, 17.270590], image:"https://images.partir.com/nGI4KNt6a4GHeaY53qWnqUgNFos=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/bosnie-herzegovine/bosnie-jajce.jpg", desc:" Situé au nord de Sarajevo, Jajce est sans conteste l’une des plus jolies bourgades du pays", poi:["À compléter"]},
+
+  {name:"Parc naturel national de Blidinje", coords:[43.608060, 17.493610], image:"https://images.partir.com/d9kjlfQLP7OWKtOzrjczaZdmB4c=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/bosnie-herzegovine/bosnie-parc-blidinje.jpg", desc:" Le parc national de Blidinje fait partie de ces bijoux sauvages comme la Bosnie en préserve", poi:["À compléter"]},
+
+  {name:"Mostar", coords:[43.343330, 17.808060], image:"https://images.partir.com/H0CRn6FiSO3We8mvs3NK-EXcW7I=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/bosnie-herzegovine/bosnie-mostar.jpg", desc:" Mostar : La Perle de la Bosnie", poi:["À compléter"]},
+
+  {name:"Le parc national du Durmitor", coords:[43.100000, 19.016670], image:"https://images.partir.com/Fpx5F4iQZIKmgaawSTV4yh1LRU4=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/montenegro/montenegro-durmitor.jpg", desc:" Véritable merveille naturelle classée au patrimoine mondial de l’UNESCO", poi:["À compléter"]},
+
+  {name:"Le monastère d'Ostrog", coords:[42.668610, 19.030000], image:"https://images.partir.com/rqW2EuheyDKPG30KDE8uvcor7m4=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/montenegro/montenegro-ostrog.jpg", desc:" Difficile de ne pas avoir le souffle coupé devant ce sublime monastère orthodoxe bâti au XVIIe siècle", poi:["À compléter"]},
+
+  {name:"Sveti Stefan", coords:[42.256110, 18.891390], image:"https://images.partir.com/rMkp4PS0rYaaCCoOzaI5hySMwBA=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/montenegro/montenegro-sveti-stefan.jpg", desc:" C’est la carte postale incontournable du pays", poi:["À compléter"]},
+
+  {name:"Le parc national de Lovcen", coords:[42.405000, 18.818330], image:"https://images.partir.com/ozcQcaZVcCYTqxipEQI8CiOWaTs=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/montenegro/montenegro-parc-lovcen.jpg", desc:" Si vous planifiez de descendre la côte Adriatique au départ de Kotor, vous aurez l'option de passer par le mont Lovcen", poi:["À compléter"]},
+
+  {name:"Dubrovnik et ses remparts", coords:[42.650661, 18.094424], image:"https://images.partir.com/ozcQcaZVcCYTqxipEQI8CiOWaTs=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/montenegro/montenegro-parc-lovcen.jpg", desc:" Si Dubrovnik est surnommée la perle de l’Adriatique, est-ce pour le bleu envoûtant de ses côtes ou pour son aspect rare et précieux ?", poi:["À compléter"]},
+
+  {name:"Split et le village de Trogir", coords:[43.516387, 16.250189], image:"https://images.partir.com/Uk-5udYTMdGdugri9TU4lPR8wQM=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/croatie/croatie-trogir.jpg", desc:" Split est la deuxième ville de Croatie après sa capitale, Zagreb, et c’est certainement l’une des plus charmantes", poi:["À compléter"]},
+
+  {name:"Parc national de Krka", coords:[43.866602, 15.972484], image:"https://images.partir.com/scAWUGjJWJn5-MY-YHkbbn52UWc=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/croatie/croatie-parc-krka.jpg", desc:" Le parc national de Krka, à prononcer Keurka, est parfois évité des touristes, surtout s’ils visitent Plitvice", poi:["À compléter"]},
+
+  {name:"Parc National de Plitvice", coords:[44.865397, 15.582012], image:"https://images.partir.com/4tx79sSlJONA388RBiDmJeOy8eo=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/croatie/croatie-parc-plitvice.jpg", desc:" Ce parc national est une raison suffisante pour entreprendre un voyage en Croatie", poi:["À compléter"]},
+
+  {name:"Lac de Bled", coords:[46.363890, 14.096940], image:"https://images.partir.com/cDeOE46qlUEV3MB5BzCh0ZNDRa0=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/slovenie/slovenie-bled.jpg", desc:" Le Lac de Bled : Un Joyau Slovène", poi:["À compléter"]},
+
+  {name:"Parc national des Dolomites", coords:[46.169940, 12.036636], image:"https://images.partir.com/il2p3EgAK7fPjyytMbw5DRLXOPA=/1200x800/filters:sharpen(0.3,0.3,true)/lieux-interet/italie/milan-et-region-des-lacs/italie-nord-parc-dolomites.jpg", desc:" Le parc national des Dolomites offre un équilibre parfait entre les montagnes grandioses du Sud Tyrol autrichien et la douceur des alpages italiens", poi:["À compléter"]},
 
 ];
 
@@ -1344,85 +1390,120 @@ var planning = [
     stops: ['Mines de Wieliczka', 'Cracovie', 'Parc de Białowieża']
   },
   {
-    flagCode: 'lt', country: 'Lituanie', duration: 0, dates: 'À définir',
-    note: 'Vilnius la baroque, château de Trakai, isthme de Courlande.',
+    flagCode: 'lt', country: 'Lituanie', duration: 5, dates: '20/08 -> 25/08',
+    note: "Traversée par Vilnius puis direction la côte.",
     stops: ['Château de Trakai', 'Vilnius', 'Isthme de Courlande']
   },
   {
-    flagCode: 'lv', country: 'Lettonie', duration: 0, dates: 'À définir',
-    note: 'Riga et sa vieille ville Art Nouveau.',
-    stops: ['Riga']
+    flagCode: 'lv', country: 'Lettonie', duration: 4, dates: '25/08 -> 29/08',
+    note: "Traversée du pays par Riga et un parc national.",
+    stops: ['Riga', 'Sigulda', 'Parc national de Gauja']
   },
   {
-    flagCode: 'ee', country: 'Estonie', duration: 3, dates: 'À définir',
-    note: 'Tallinn médiévale, perle de la Baltique.',
-    stops: ['Tallinn']
+    flagCode: 'ee', country: 'Estonie', duration: 5, dates: '29/08 -> 03/09',
+    note: "Traversée de l'Estonie en profitant des parcs nationaux.",
+    stops: ['Parc national de Soomaa', 'Lahemaa', 'Tallinn']
   },
   {
-    flagCode: 'fi', country: 'Finlande', duration: 5, dates: 'À définir',
-    note: 'Helsinki, puis remontée vers la Laponie.',
-    stops: ['Helsinki', 'Remontée vers le nord']
+    flagCode: 'fi', country: 'Finlande', duration: 10, dates: '03/09 -> 13/09',
+    note: "Remontée de la Finlande vers la Laponie.",
+    stops: ['Helsinki', 'Les Grands Lacs', 'Laponie Finlandaise']
   },
   {
-    flagCode: 'no', country: 'Norvège', duration: 25, dates: 'À définir',
-    note: 'Cap Nord, Îles Lofoten, fjords de Geiranger et Aurlandsfjellet.',
+    flagCode: 'no', country: 'Norvège', duration: 15, dates: '13/09 -> 28/09',
+    note: "Descente de la Norvège le long des Fjords.",
     stops: ['Cap Nord', 'Îles Lofoten', 'Trondheim', 'Geiranger', 'Aurlandsfjellet']
   },
   {
-    flagCode: 'se', country: 'Suède', duration: 3, dates: 'À définir',
-    note: 'Descente vers Göteborg.',
-    stops: ['Göteborg']
+    flagCode: 'se', country: 'Suède', duration: 5, dates: '28/09 -> 03/10',
+    note: "Partie sud de la Suède.",
+    stops: ['Parc national de Fulufjället', 'Göteborg', 'Malmö']
   },
   {
-    flagCode: 'dk', country: 'Danemark', duration: 3, dates: 'À définir',
-    note: 'Copenhague et sa douceur de vivre.',
-    stops: ['Copenhague']
+    flagCode: 'dk', country: 'Danemark', duration: 5, dates: '03/10 -> 08/10',
+    note: "Traversée du pays en visitant Copenhague.",
+    stops: ['Copenhague', 'Aarhus']
   },
   {
-    flagCode: 'de', country: 'Allemagne (retour)', duration: 2, dates: 'À définir',
-    note: 'Berlin incontournable.',
-    stops: ['Berlin']
+    flagCode: 'de', country: 'Allemagne', duration: 4, dates: '08/10 -> 12/10',
+    note: "Traversée de l'Allemagne pour la 2ème boucle.",
+    stops: ['Berlin', 'Suisse saxonne']
   },
   {
-    flagCode: 'cz', country: 'Rép. tchèque (retour)', duration: 2, dates: 'À définir',
-    note: 'Prague, cent clochers.',
-    stops: ['Prague']
+    flagCode: 'cz', country: 'Rép. tchèque', duration: 5, dates: '12/10 -> 17/10',
+    note: "Visite du nord-ouest cette fois-ci.",
+    stops: ['Parc national de la Suisse Tchèque', 'Prague']
   },
   {
-    flagCode: 'hu', country: 'Slovaquie / Hongrie', duration: 3, dates: 'À définir',
-    note: 'Bratislava puis Budapest.',
-    stops: ['Bratislava', 'Budapest']
+    flagCode: 'sk', country: 'Slovaquie', duration: 3, dates: '17/10 -> 20/10',
+    note: "Reste Bratislava à visiter.",
+    stops: ['Bratislava']
   },
   {
-    flagCode: 'ro', country: 'Roumanie', duration: 5, dates: 'À définir',
-    note: 'Transylvanie, Bucarest.',
-    stops: ['Bucarest']
+    flagCode: 'hu', country: 'Slovaquie / Hongrie', duration: 3, dates: '20/10 -> 23/10',
+    note: "Traversée de la Hongrie par Budapest.",
+    stops: ['Budapest']
   },
   {
-    flagCode: 'tr', country: 'Turquie', duration: 14, dates: 'À définir',
-    note: 'Istanbul, Cappadoce, côte turquoise, Izmir.',
-    stops: ['Istanbul', 'Cappadoce', 'Antalya', 'Izmir']
+    flagCode: 'ro', country: 'Roumanie', duration: 8, dates: '23/10 -> 01/11',
+    note: "Traversée de la Roumanie du nord au sud.",
+    stops: ['Les Monastères de Bucovine', 'Parc national Piatra Craiului', 'Bucarest']
   },
   {
-    flagCode: 'gr', country: 'Grèce', duration: 4, dates: 'À définir',
-    note: 'Théssalonique en remontant vers les Balkans.',
-    stops: ['Théssalonique']
+    flagCode: 'tr', country: 'Turquie', duration: 17, dates: '01/11 -> 18/11',
+    note: "Partie ouest de la Turquie.",
+    stops: ['Istanbul', 'Cappadoce', 'Antalya', 'Sources thermales de Pamukkale', 'Site archéologique de Troie', 'Izmir']
   },
   {
-    flagCode: 'ba', country: 'Balkans', duration: 10, dates: 'À définir',
-    note: 'Sarajevo, Dubrovnik, Split, Lac de Bled.',
-    stops: ['Sarajevo', 'Dubrovnik', 'Split', 'Lac de Bled']
+    flagCode: 'gr', country: 'Grèce', duration: 5, dates: '18/11 -> 23/11',
+    note: "Traversée nord de la Grèce.",
+    stops: ['Théssalonique', 'Météores']
   },
   {
-    flagCode: 'it', country: 'Italie (retour)', duration: 3, dates: 'À définir',
-    note: 'Dolomites avant de rentrer.',
+    flagCode: 'al', country: 'Albanie', duration: 7, dates: '23/11 -> 30/11',
+    note: "Visite de l'Albanie.",
+    stops: ['Ksamil', 'Parc national Llogara', 'Lake Bovilla', 'Lac de Bled']
+  },
+  {
+    flagCode: 'mk', country: 'Macédoine du Nord', duration: 4, dates: '30/11 -> 04/12',
+    note: "Partie nord de la Macédoine.",
+    stops: ['Parc national de Mavrovo', 'Skopje']
+  },
+  {
+    flagCode: 'xk', country: 'Kosovo', duration: 3, dates: '04/12 -> 07/12',
+    note: "Traversée du Kosovo pour aller en Serbie.",
+    stops: ['Le lac de Batlava']
+  },
+  {
+    flagCode: 'rs', country: 'Serbie', duration: 3, dates: '07/12/ -> 10/12',
+    note: "Traversée de la Serbie.",
+    stops: ['Zlatibor']
+  },
+  {
+    flagCode: 'ba', country: 'Bosnie-Herzégovine', duration: 8, dates: '10/12/ -> 18/12',
+    note: "Visite des terres.",
+    stops: ['Jajce', 'Mostar', 'Sarajevo']
+  },
+  {
+    flagCode: 'me', country: 'Monténégro', duration: 7, dates: '18/12/ -> 25/12',
+    note: "Entre montagne et mer.",
+    stops: ['Le parc national du Durmitor', 'Le monastère d\'Ostrog', 'Sveti Stefan', 'Le parc national de Lovcen']
+  },
+  {
+    flagCode: 'hr', country: 'Croatie', duration: 7, dates: '25/12/ -> 01/01',
+    note: "Remontée de la Craotie par la côte et les montagne.",
+    stops: ['Dubrovnik', 'Split', 'Parc national de Krka', 'Parc National de Plitvice']
+  },
+  {
+    flagCode: 'si', country: 'Slovénie', duration: 3, dates: '01/01/ -> 01/01',
+    note: "Traversée de la Slovénie pour atteindre l'Italie.",
+    stops: ['Lac de Bled']
+  },
+  {
+    flagCode: 'it', country: 'Italie', duration: 5, dates: '01/01/ -> 01/01',
+    note: "Stop dans les Dolomites avant le retour.",
     stops: ['Dolomites']
   },
-  {
-    flagCode: 'fr', country: 'France (retour)', duration: 1, dates: 'À définir',
-    note: 'Retour à Ivry-sur-Seine.',
-    stops: ['Ivry-sur-Seine — arrivée']
-  }
 ];
 
 var planningList = document.getElementById('planningList');
@@ -1432,7 +1513,10 @@ planning.forEach(function(p, idx) {
   block.className = 'country-block';
 
   var stopsHtml = p.stops.map(function(s) {
-    return '<div class="country-stop"><div class="stop-dot"></div><span>' + s + '</span></div>';
+    return '<div class="country-stop" onclick="focusStop(\'' + s.replace(/'/g, "\\'") + '\')">' +
+      '<div class="stop-dot"></div><span>' + s + '</span>' +
+      '<span style="margin-left:auto;font-size:10px;opacity:0.4;">→</span>' +
+      '</div>';
   }).join('');
 
   block.innerHTML =
@@ -1456,6 +1540,41 @@ planning.forEach(function(p, idx) {
 function toggleCountry(header) {
   var block = header.parentElement;
   block.classList.toggle('open');
+}
+
+/* ═══ FOCUS STOP — clic depuis le planning ═══ */
+function focusStop(name) {
+  // Cherche d'abord dans les POI (highlights), puis dans les villes (stages)
+  var found = null;
+
+  for (var i = 0; i < poiMarkerRefs.length; i++) {
+    if (poiMarkerRefs[i].data.name === name) {
+      found = poiMarkerRefs[i];
+      break;
+    }
+  }
+  if (!found) {
+    for (var j = 0; j < cityMarkerRefs.length; j++) {
+      if (cityMarkerRefs[j].data.name === name) {
+        found = cityMarkerRefs[j];
+        break;
+      }
+    }
+  }
+
+  if (!found) return;
+
+  // Sur mobile : fermer la sidebar d'abord, puis centrer
+  if (window.innerWidth <= 768) {
+    mobileNav('map', document.getElementById('navMap'));
+    setTimeout(function() {
+      map.setView(found.marker.getLatLng(), 10, { animate: true });
+      setTimeout(function() { found.marker.openPopup(); }, 400);
+    }, 380);
+  } else {
+    map.setView(found.marker.getLatLng(), 10, { animate: true });
+    setTimeout(function() { found.marker.openPopup(); }, 300);
+  }
 }
 
 /* ═══ Init taille marqueurs ═══ */
