@@ -109,14 +109,23 @@
   .main {
     display: flex;
     flex: 1;
+    min-height: 0;
     overflow: hidden;
     gap: 0;
   }
 
-  /* ─── MAP ─── */
+  /* ─── MAP WRAPPER ─── */
+  .map-wrapper {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
   #map {
     flex: 1;
-    height: 100%;
+    min-height: 0;
     z-index: 1;
   }
 
@@ -310,7 +319,7 @@
 
   /* ─── LÉGENDE ─── */
   .legend-box {
-    padding: 12px 20px;
+    padding: 10px 16px;
     border-top: 1px solid var(--border);
     background: var(--bg);
     flex-shrink: 0;
@@ -322,21 +331,58 @@
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--muted);
-    margin-bottom: 8px;
+    margin-bottom: 7px;
   }
 
   .legend-items {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
   }
 
   .legend-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--ink);
+    padding: 2px 0;
+    user-select: none;
+  }
+  .legend-item.hidden-layer {
+    opacity: 0.4;
+  }
+  .legend-item.hidden-layer span {
+    text-decoration: line-through;
+  }
+  /* Case à cocher custom */
+  .legend-check {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    background: var(--panel);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-left: auto;
+  }
+  .legend-check::after {
+    content: "✓";
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--red);
+    line-height: 1;
+  }
+  .legend-item.hidden-layer .legend-check::after {
+    content: "";
+  }
+  .legend-item.hidden-layer .legend-check {
+    border-color: var(--border);
+    background: var(--bg);
   }
 
   .legend-dot {
@@ -464,13 +510,13 @@
   /* ─── TOOLTIP INFO ─── */
   .map-hint {
     position: absolute;
-    bottom: 20px;
-    right: 340px;
-    z-index: 1000;
+    bottom: calc(48px + 20px + 12px);
+    right: 16px;
+    z-index: 999;
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 8px 12px;
+    padding: 6px 10px;
     font-size: 11px;
     color: var(--muted);
     pointer-events: none;
@@ -674,7 +720,8 @@
 
     /* ─── Layout : carte plein écran ─── */
     .main { flex-direction: column; }
-    #map { width: 100%; height: 100%; }
+    .map-wrapper { width: 100%; }
+    #map { width: 100%; }
 
     /* ─── Sidebar → panneau glissant depuis le bas ─── */
     .sidebar {
@@ -783,6 +830,403 @@
   }
   .bottom-nav-btn.active .nav-label { color: var(--red); }
   .bottom-nav-btn.active .nav-icon { filter: none; }
+
+  /* ─── FRISE TEMPORELLE ─── */
+  /* ─── FRISE CONTAINER — dans map-wrapper, largeur automatique ─── */
+  .frise-container {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-top: 1px solid var(--border);
+    background: var(--panel);
+    z-index: 50;
+  }
+
+  .frise-bar {
+    flex-shrink: 0;
+    height: 48px;
+    background: var(--panel);
+    display: flex;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ─── FRISE MOIS ─── */
+  .frise-months {
+    height: 20px;
+    display: flex;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    position: relative;
+  }
+  .frise-month {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--border);
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .frise-month.current-month {
+    color: var(--red);
+    font-weight: 700;
+  }
+  .frise-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    overflow: hidden;
+    cursor: default;
+    position: relative;
+    transition: filter 0.15s;
+    gap: 1px;
+  }
+  .frise-segment:hover { filter: brightness(0.93); }
+  .frise-flag {
+    font-size: 14px;
+    line-height: 1;
+  }
+  .frise-label {
+    font-size: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    padding: 0 3px;
+  }
+  .frise-today {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: var(--red);
+    z-index: 10;
+    pointer-events: none;
+  }
+  .frise-today::before {
+    content: "aujourd'hui";
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    font-size: 8px;
+    color: var(--red);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  @media (max-width: 768px) {
+    .frise-bar { height: 40px; }
+    .frise-label { display: none; }
+    .frise-flag { font-size: 12px; }
+  }
+
+  /* ─── MODALE SUGGESTIONS REÇUES ─── */
+  .suggestions-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,46,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+  }
+  .suggestions-overlay.open { display: flex; }
+  .suggestions-modal {
+    background: var(--panel);
+    border-radius: 18px;
+    width: 520px;
+    max-width: 95vw;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 64px rgba(26,26,46,0.3);
+    animation: modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    overflow: hidden;
+  }
+  .sugg-header {
+    padding: 20px 24px 16px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d4e 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .sugg-header h3 { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; }
+  .sugg-header p { font-size: 12px; opacity: 0.6; margin-top: 3px; }
+  .sugg-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scrollbar-width: thin;
+  }
+  .sugg-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sugg-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .sugg-card-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .sugg-card-place {
+    font-size: 12px;
+    color: var(--red);
+    font-weight: 500;
+  }
+  .sugg-card-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .sugg-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+  }
+  .sugg-card-date { font-size: 10px; color: var(--muted); }
+  .like-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .like-btn:hover { border-color: var(--red); color: var(--red); }
+  .like-btn.liked { background: rgba(200,55,43,0.08); border-color: var(--red); color: var(--red); }
+  .sugg-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .sugg-loading {
+    text-align: center;
+    padding: 30px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* ─── BOUTONS CARTE GROUPÉS ─── */
+  .map-btns {
+    position: absolute;
+    bottom: calc(48px + 20px + 12px + 30px + 8px);
+    right: 16px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  .map-btns .suggest-btn {
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+  }
+  @media (max-width: 768px) {
+    .map-btns { bottom: calc(48px + 20px + 66px); right: 12px; }
+  }
+
+
+  /* ─── MARQUEUR POINT D'ATTENTION ─── */
+  .warning-marker {
+    background: white;
+    border: 2px solid #c8372b;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(200,55,43,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    line-height: 1;
+    transition: all 0.2s;
+  }
+
+  /* ─── BOUTON MÉTÉO VERTICAL ─── */
+  .meteo-tab {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #3a7bd5;
+    color: white;
+    border: none;
+    border-radius: 0 10px 10px 0;
+    padding: 14px 8px;
+    cursor: pointer;
+    box-shadow: 3px 0 12px rgba(58,123,213,0.35);
+    transition: all 0.2s;
+    gap: 6px;
+    font-family: "DM Sans", sans-serif;
+  }
+  .meteo-tab:hover { background: #2d68c4; padding-left: 12px; }
+  .meteo-tab .tab-icon { font-size: 18px; line-height: 1; }
+  .meteo-tab .tab-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    white-space: nowrap;
+  }
+
+  /* ─── PANNEAU MÉTÉO — se déplie vers la droite ─── */
+  .meteo-panel {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    width: 260px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    box-shadow: 4px 0 24px rgba(26,26,46,0.15);
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .meteo-panel.open {
+    transform: translateX(0);
+  }
+  .meteo-panel-header {
+    padding: 14px 16px 10px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d3a6e 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .meteo-panel-header h3 {
+    font-family: "Playfair Display", serif;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .meteo-panel-header p {
+    font-size: 11px;
+    opacity: 0.6;
+    margin-top: 2px;
+  }
+  .meteo-close {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .meteo-close:hover { background: rgba(255,255,255,0.3); }
+  .meteo-inner {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .meteo-inner::-webkit-scrollbar { width: 4px; }
+  .meteo-inner::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .meteo-week {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .meteo-week-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
+  .meteo-week-num {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+  }
+  .meteo-icon { font-size: 18px; line-height: 1; }
+  .meteo-zone {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .meteo-temp {
+    font-size: 13px;
+    font-weight: 700;
+    color: #3a7bd5;
+    margin-top: 1px;
+  }
+  .meteo-desc {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .meteo-lieux {
+    font-size: 9px;
+    color: var(--gold);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  @media (max-width: 768px) {
+    .meteo-panel { width: 240px; }
+    .meteo-tab { top: 40%; }
+  }
 </style>
 </head>
 
@@ -808,20 +1252,51 @@
       <div class="stat-num">~25 000</div>
       <div class="stat-label">km</div>
     </div>
+    <div class="stat" style="border-left:1px solid var(--border);padding-left:20px;">
+      <div class="stat-num" id="countdownNum" style="color:var(--red);">…</div>
+      <div class="stat-label">Jours avant<br>le départ 🚐</div>
+    </div>
   </div>
 </header>
 
 <!-- ═══════════════════ MAIN ═══════════════════ -->
 <div class="main">
 
-  <!-- MAP -->
-  <div id="map"></div>
-  <div class="map-hint">🔍 Zoom pour voir les points remarquables</div>
-
-  <!-- BOUTON SUGGÉRER -->
-  <button class="suggest-btn" onclick="openModal()">
-    💡 Proposer une idée
-  </button>
+  <!-- MAP WRAPPER -->
+  <div class="map-wrapper">
+    <div id="map"></div>
+    <!-- BOUTON MÉTÉO VERTICAL -->
+    <button class="meteo-tab" id="meteoTab" onclick="toggleMeteo()">
+      <span class="tab-icon">🌤️</span>
+      <span class="tab-label">Météo du voyage</span>
+    </button>
+    <!-- PANNEAU MÉTÉO LATÉRAL -->
+    <div class="meteo-panel" id="meteoPanel">
+      <div class="meteo-panel-header">
+        <div>
+          <h3>🌤️ Météo du voyage</h3>
+          <p>Prévisions semaine par semaine</p>
+        </div>
+        <button class="meteo-close" onclick="toggleMeteo()">✕</button>
+      </div>
+      <div class="meteo-inner" id="meteoInner"></div>
+    </div>
+    <!-- BOUTONS CARTE -->
+    <div class="map-btns" id="mapBtns">
+      <button class="suggest-btn" style="position:relative;bottom:auto;left:auto;transform:none;" onclick="openModal()">
+        💡 Proposer
+      </button>
+      <button class="suggest-btn" style="position:relative;bottom:auto;left:auto;transform:none;background:var(--ink);" onclick="openSuggestions()">
+        👀 Voir les idées
+      </button>
+    </div>
+    <div class="map-hint">🔍 Zoom pour voir les points remarquables</div>
+    <!-- FRISE TEMPORELLE -->
+    <div class="frise-container">
+      <div class="frise-bar" id="friseBar"></div>
+      <div class="frise-months" id="friseMonths"></div>
+    </div>
+  </div>
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -844,23 +1319,33 @@
           <div class="legend-dot" style="background:#c8372b;"></div>
           <span>Route du voyage</span>
         </div>
-        <div class="legend-item">
-          <div style="width:16px;height:16px;background:white;border:2px solid #2a7a4b;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🚐</div>
-          <span>Spots vanlife</span>
-        </div>
-        <div class="legend-item">
-          <div style="width:16px;height:16px;background:white;border:2px solid #e07b20;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🏔️</div>
-          <span>Routes panoramiques</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:#c9933a; border-radius:3px;"></div>
+        <div class="legend-item" data-layer="poi" onclick="toggleLayer(this)">
+          <div class="legend-dot" style="background:#c9933a;border-radius:3px;"></div>
           <span>Lieux remarquables</span>
+          <div class="legend-check"></div>
+        </div>
+        <div class="legend-item" data-layer="van" onclick="toggleLayer(this)">
+          <div style="width:14px;height:14px;background:white;border:2px solid #2a7a4b;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🚐</div>
+          <span>Spots vanlife</span>
+          <div class="legend-check"></div>
+        </div>
+        <div class="legend-item" data-layer="route" onclick="toggleLayer(this)">
+          <div style="width:14px;height:14px;background:white;border:2px solid #e07b20;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🏔️</div>
+          <span>Routes panoramiques</span>
+          <div class="legend-check"></div>
+        </div>
+        <div class="legend-item" data-layer="warning" onclick="toggleLayer(this)">
+          <div style="width:14px;height:14px;background:white;border:2px solid #c8372b;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">⚠️</div>
+          <span>Points d'attention</span>
+          <div class="legend-check"></div>
         </div>
       </div>
     </div>
 
   </aside>
 </div>
+
+
 
 <!-- ═══ BOTTOM NAV (mobile uniquement) ═══ -->
 <nav class="bottom-nav" id="bottomNav">
@@ -1187,10 +1672,61 @@ var scenicRoutes = [
   {name:"Grande route des Dolomites", coords:[46.4100,11.8440], desc:"Cols + sommets mythiques des Dolomites italiennes.", poi:["Cols mythiques","Paysage dolomitique"]}
 ];
 
+/* ══════════════════════════════════════════
+   ⚠️ POINTS D'ATTENTION
+   Complète la liste ci-dessous avec tes propres alertes
+══════════════════════════════════════════ */
+var warnings = [
+  {
+    name: "Vignette Slovaquie",
+    coords: [48.148, 17.107],
+    desc: "Vignette obligatoire pour les autoroutes slovaques. À acheter en ligne avant ou aux stations-service frontière.",
+    poi: ["Prix : ~15€ / 10 jours", "Achat en ligne : eznamka.sk"]
+  },
+  {
+    name: "Vignette Autriche",
+    coords: [47.800, 13.000],
+    desc: "Vignette obligatoire sur toutes les autoroutes autrichiennes.",
+    poi: ["Prix : ~9€ / 10 jours", "Achat en ligne : asfinag.at"]
+  },
+  {
+    name: "Alcool Norvège",
+    coords: [65.000, 14.000],
+    desc: "Alcool très cher et restrictions strictes en Norvège. Prévoir ses stocks avant d'entrer.",
+    poi: ["Bière en supermarché max 4.7°", "Spiritueux uniquement en Vinmonopolet"]
+  },
+  {
+    name: "Bivouac Norvège — réglementation",
+    coords: [69.000, 20.000],
+    desc: "Le droit de séjour en pleine nature (allemannsretten) autorise 2 nuits max au même endroit, à 150m min des habitations.",
+    poi: ["Gratuit mais 2 nuits max", "S'éloigner des habitations"]
+  },
+  {
+    name: "Frontière Turquie — assurance",
+    coords: [41.700, 26.600],
+    desc: "L'assurance green card doit être valide pour la Turquie. Vérifier avant le départ.",
+    poi: ["Green card Turquie obligatoire", "Contrôle strict à la frontière"]
+  },
+  {
+    name: "Passage Bosnie — change",
+    coords: [44.500, 16.500],
+    desc: "La Bosnie-Herzégovine utilise le mark convertible (BAM). Pas d'euros acceptés partout.",
+    poi: ["1€ ≈ 1.96 BAM", "Prévoir du cash local"]
+  },
+  {
+    name: "Ferry Helsinki — Tallinn",
+    coords: [59.800, 24.800],
+    desc: "Traversée en ferry obligatoire (2h30). Réservation recommandée en haute saison.",
+    poi: ["Compagnies : Tallink, Viking Line", "À réserver à l'avance en été"]
+  }
+];
+
+
 /* ═══ GROUPES DE CALQUES ═══ */
-var poiMarkers  = L.layerGroup();
-var vanLayer    = L.layerGroup();
-var routeLayer  = L.layerGroup();
+var poiMarkers    = L.layerGroup();
+var vanLayer      = L.layerGroup();
+var routeLayer    = L.layerGroup();
+var warningLayer  = L.layerGroup();
 
 /* ═══ CRÉATION ICÔNES ═══ */
 function makeVanIcon() {
@@ -1205,6 +1741,15 @@ function makeVanIcon() {
 function makeRouteIcon() {
   return L.divIcon({
     html: '<div class="route-marker" style="width:26px;height:26px;">🏔️</div>',
+    className: '',
+    iconSize: [26, 26],
+    iconAnchor: [13, 13]
+  });
+}
+
+function makeWarningIcon() {
+  return L.divIcon({
+    html: '<div class="warning-marker" style="width:26px;height:26px;">⚠️</div>',
     className: '',
     iconSize: [26, 26],
     iconAnchor: [13, 13]
@@ -1256,6 +1801,15 @@ scenicRoutes.forEach(function(p) {
   routeMarkerRefs.push({ marker: m, data: p });
 });
 
+/* ═══ AJOUT POINTS D'ATTENTION ═══ */
+var warningMarkerRefs = [];
+warnings.forEach(function(p) {
+  var m = L.marker(p.coords, { icon: makeWarningIcon() })
+    .bindPopup(buildPopup(p), { maxWidth: 260 });
+  warningLayer.addLayer(m);
+  warningMarkerRefs.push({ marker: m, data: p });
+});
+
 /* ═══ AJOUT POI ═══ */
 var poiMarkerRefs = [];
 highlights.forEach(function(p) {
@@ -1268,6 +1822,7 @@ highlights.forEach(function(p) {
 map.addLayer(poiMarkers);
 map.addLayer(vanLayer);
 map.addLayer(routeLayer);
+map.addLayer(warningLayer);
 
 /* ═══ MISE À JOUR TAILLE DES MARQUEURS SELON ZOOM ═══ */
 function updateMarkerSizes() {
@@ -1287,85 +1842,247 @@ function updateMarkerSizes() {
 map.on('zoomend', updateMarkerSizes);
 
 /* ═══ TRACÉ ROUTE ═══ */
-var routeCoords = [
-[48.807381,2.369659],[48.732231,3.920274],[48.635994,4.92217],[48.682030,6.118574],
-[48.455245,6.754794],[48.088683,6.902125],[48.035061,7.279741],[48.029482,7.595003],
-[48.108681,7.651468],[48.472866,7.908234],[48.130259,8.235041],[47.923475,8.188005],
-[47.858956,8.036624],[47.840212,9.035729],[47.698776,9.271740],[47.575295,9.727677],
-[47.686212,10.363561],[47.556127,10.740210],[47.837872,10.891509],[48.369603,10.895272],
-[48.610761,11.658497],[49.203283,12.337878],[49.160583,13.273660],[48.737241,14.107785],
-[48.974299,14.481938],[49.380363,14.721741],[49.526770,15.347961],[48.909641,17.990173],
-[49.226344,18.654846],[49.071357,20.275330],[49.984884,20.073880],[50.064011,19.944448],
-[52.140034,20.988230],[52.689508,23.855662],[53.822055,22.948734],[54.580338,24.157230],
-[54.633917,24.912540],[54.687416,25.279281],[55.022725,26.046993],[55.344977,26.073086],
-[55.061167,24.167072],[55.694526,21.207270],[55.914942,21.080699],[56.028333,21.833885],
-[56.698806,22.517251],[56.953964,24.103301],[57.328420,25.222555],[57.549595,25.379209],
-[58.190575,25.055850],[58.328038,25.304085],[58.485463,24.980726],[59.277484,24.740554],
-[59.492889,25.476638],[59.434386,24.768648],[60.177430,24.929724],[61.884329,27.765983],
-[63.108921,29.660411],[64.285964,28.013352],[66.352412,29.293724],[66.793260,27.331657],
-[67.425680,26.584587],[68.677785,27.485466],[68.912238,27.046012],[68.765497,26.298942],
-[69.135495,27.182371],[69.473274,25.512449],[71.173859,25.776121],[70.473097,25.059309],
-[69.929832,23.103742],[70.113843,22.927961],[69.882737,21.983137],[69.751968,20.505476],
-[69.187549,19.697980],[69.312105,17.714948],[68.995415,18.514622],[68.533840,17.196262],
-[67.880802,12.978333],[68.214943,14.548404],[68.010751,15.308750],[68.112012,15.842577],
-[68.009394,16.023852],[67.600948,15.930168],[67.090193,15.374905],[66.500182,14.921729],
-[65.871684,13.208013],[65.356769,13.323492],[65.322077,12.635234],[65.504657,12.298034],
-[65.397185,12.085551],[64.304826,12.283226],[63.776470,11.461784],[63.433119,10.403634],
-[63.107555,7.785827],[63.002900,7.296194],[62.559227,7.693444],[62.613883,7.126717],
-[62.466968,6.824593],[62.100354,7.206368],[61.955476,6.467596],[61.857177,6.810919],
-[61.867540,6.582953],[61.565612,6.473089],[61.092550,7.522284],[60.910134,7.181707],
-[61.154184,8.678502],[60.880030,10.903234],[61.354957,12.666539],[61.643285,12.732457],
-[60.707425,13.710654],[59.110383,13.007529],[57.702895,12.000535],[56.624860,12.927634],
-[56.074559,12.775201],[55.602496,12.992303],[55.674310,12.570577],[55.373268,11.255060],
-[55.379511,10.293756],[55.600473,9.579644],[56.155121,10.183893],[55.517624,9.411466],
-[54.811616,9.307194],[54.028669,9.953913],[53.950276,10.272226],[53.558632,10.407996],
-[53.344018,11.822879],[52.762908,12.812554],[52.521677,13.406493],[51.844391,13.917964],
-[51.138642,13.749935],[51.158210,13.959188],[51.063235,13.938402],[50.992057,14.105847],
-[50.887606,14.233953],[50.674842,14.174853],[50.299086,14.514456],[50.076501,14.436771],
-[49.876260,15.475902],[49.170279,15.607967],[48.469539,16.835391],[48.143953,16.906191],
-[48.148143,17.104719],[47.491679,19.042444],[47.877326,20.875340],[47.945055,22.397016],
-[47.684494,23.731960],[47.807398,24.058910],[47.550932,24.520248],[47.630505,24.462894],
-[47.441918,25.300842],[47.551149,25.878240],[47.265253,25.671741],[47.087636,25.962438],
-[46.802213,25.492097],[46.292289,25.034821],[45.798108,25.597179],[45.487032,25.240124],
-[45.847487,24.960551],[45.709567,24.257426],[45.069188,24.405741],[45.141795,24.618915],
-[44.427848,26.102095],[43.846397,25.986917],[43.521651,26.541647],[43.230901,26.552968],
-[42.877949,26.443532],[42.653548,26.673726],[41.955829,26.598252],[41.688666,26.585826],
-[41.117454,28.173360],[40.980746,28.964376],[40.741998,32.136558],[39.211106,33.163618],
-[38.501024,34.361128],[38.663872,34.835535],[37.770908,32.364993],[37.731819,32.073855],
-[36.734678,31.606936],[36.892997,30.728030],[36.490066,30.453636],[36.240853,29.811570],
-[36.311606,29.317317],[36.661327,29.146755],[36.958446,29.151943],[37.262644,29.466080],
-[37.913406,29.116041],[37.794955,28.053471],[37.936987,27.348304],[38.026317,27.446448],
-[38.240196,27.228094],[38.426557,27.147070],[39.062740,27.021534],[39.549631,26.963271],
-[39.609506,26.407822],[39.961715,26.260221],[40.411828,26.752261],[40.278047,28.932515],
-[40.790599,29.486817],[41.163190,28.506293],[40.884782,25.768992],[41.079684,24.862620],
-[40.693469,22.978465],[40.558665,22.585000],[40.359174,21.821744],[40.069976,21.437203],
-[39.930127,21.575094],[39.719817,21.615878],[39.820940,21.324806],[39.683510,20.888699],
-[39.698883, 20.969642],[39.594096, 20.849565],[39.457504, 20.335762],[39.763975,19.999580],
-[39.918440,20.185895],[40.080483,20.142625],[39.877993,20.026966],[40.214468,19.567480],
-[40.468057,19.521972],[40.512966,19.792510],[40.267164,20.049316],[40.274499,20.277282],
-[40.435661,20.280029],[40.770829,19.884598],[41.094526,20.016434],[41.353946,19.770128],
-[41.443995,19.866613],[41.474059,20.089070],[41.578668,20.485165],[41.519036,20.546369],
-[41.582123,20.621430],[41.720182,20.665313],[41.656367,20.734600],[42.000525,20.995252],
-[42.003100,21.412133],[42.292156,21.195968],[42.808110,21.165756],[42.821240,21.315086],
-[42.971678,20.347795],[43.696852,19.674883],[43.818225,18.997689],[43.856205,18.411949],
-[44.139359,18.037831],[44.143301,17.392384],[44.334173,17.266042],[43.939564,17.589711],
-[43.628248,17.633656],[43.662198,17.759258],[43.500408,17.749548],[43.407358,17.883555],
-[43.342628,17.805858],[43.191402,18.499813],[42.856076,18.906307],[43.099219,19.095821],
-[42.897871,19.080688],[42.898284,18.959524],[42.812713,18.896353],[42.574505,19.054281],
-[42.462151,19.234182],[42.384394,19.099575],[42.387253,18.933505],[42.302563,18.932534],
-[42.315509,18.855688],[42.251860,18.898704],[42.281281,18.820566],[42.378300,18.750072],
-[42.424950,18.799783],[42.486727,18.765223],[42.487234,18.695872],[42.517101,18.691065],
-[42.489259,18.649867],[42.478625,18.683855],[42.438605,18.607981],[42.455832,18.500864],
-[42.563681,18.247963],[42.617771,18.215691],[42.649596,18.094155],[42.896908,17.568595],
-[43.161935,17.467341],[43.589277,16.640979],[43.515894,16.441737],[43.582723,16.527889],
-[43.954651,16.082138],[44.020885,16.123302],[44.247003,16.070876],[44.296170,15.870375],
-[44.412040,15.889601],[44.768025,15.694594],[45.402229,15.248582],[45.475816,15.438911],
-[45.831488,15.159244],[46.039494,14.444542],[46.356741,14.126033],[46.513227,13.314342],
-[46.329572,13.058910],[45.895451,13.281383],[45.790217,12.830943],[45.945129,12.622203],
-[45.880156,12.347545],[46.394016,11.842174],[46.682631,11.110615],[46.644591,10.593267],
-[47.350271,10.810369],[48.446523,9.983535],[48.964732,8.445347],[48.571991,6.509910],
-[48.812871,2.366504]
-];
+var routeCoords = [].concat(
+
+  /* ═══ 🇫🇷 FRANCE — Ivry → Alsace ═══ */
+  [
+    [48.807381,2.369659],[48.732231,3.920274],[48.635994,4.92217],[48.682030,6.118574],
+    [48.455245,6.754794],[48.088683,6.902125],[48.035061,7.279741],[48.029482,7.595003],
+  ],
+
+  /* ═══ 🇩🇪 ALLEMAGNE — Forêt-Noire → Bavière → Ratisbonne ═══ */
+  [
+    [48.108681,7.651468],[48.472866,7.908234],[48.130259,8.235041],[47.923475,8.188005],
+    [47.858956,8.036624],[47.840212,9.035729],[47.698776,9.271740],[47.575295,9.727677],
+    [47.686212,10.363561],[47.556127,10.740210],[47.837872,10.891509],[48.369603,10.895272],
+    [48.610761,11.658497],[49.203283,12.337878],
+  ],
+
+  /* ═══ 🇨🇿 RÉPUBLIQUE TCHÈQUE — Šumava → České Budějovice → Telč ═══ */
+  [
+    [49.160583,13.273660],[48.737241,14.107785],[48.974299,14.481938],[49.380363,14.721741],
+    [49.526770,15.347961],
+  ],
+
+  /* ═══ 🇸🇰 SLOVAQUIE — Hautes Tatras → Stara Bystrica ═══ */
+  [
+    [48.909641,17.990173],[49.226344,18.654846],[49.071357,20.275330],
+  ],
+
+  /* ═══ 🇵🇱 POLOGNE — Tatras → Cracovie → Białowieża → Biebrza ═══ */
+  [
+    [49.984884,20.073880],[50.064011,19.944448],[52.140034,20.988230],
+    [52.689508,23.855662],[53.822055,22.948734],
+  ],
+
+  /* ═══ 🇱🇹 LITUANIE — Château Trakai → Vilnius → Isthme de Courlande ═══ */
+  [
+    [54.580338,24.157230],[54.633917,24.912540],[54.687416,25.279281],
+    [55.022725,26.046993],[55.344977,26.073086],[55.061167,24.167072],
+    [55.694526,21.207270],[55.914942,21.080699],[56.028333,21.833885],
+  ],
+
+  /* ═══ 🇱🇻 LETTONIE — Riga → Sigulda → Gauja ═══ */
+  [
+    [56.698806,22.517251],[56.953964,24.103301],[57.328420,25.222555],[57.549595,25.379209],
+  ],
+
+  /* ═══ 🇪🇪 ESTONIE — Soomaa → Lahemaa → Tallinn ═══ */
+  [
+    [58.190575,25.055850],[58.328038,25.304085],[58.485463,24.980726],
+    [59.277484,24.740554],[59.492889,25.476638],[59.434386,24.768648],
+  ],
+
+  /* ═══ 🇫🇮 FINLANDE — Helsinki → Oulanka → Laponie → Lac Inari ═══ */
+  [
+    [60.177430,24.929724],[61.884329,27.765983],[63.108921,29.660411],
+    [64.285964,28.013352],[66.352412,29.293724],[66.793260,27.331657],
+    [67.425680,26.584587],
+  ],
+
+  /* ═══ 🇳🇴 NORVÈGE NORD — Cap Nord ═══ */
+  [
+    [68.677785,27.485466],[68.912238,27.046012],[68.765497,26.298942],
+    [69.135495,27.182371],[69.473274,25.512449],[71.173859,25.776121],
+  ],
+
+  /* ═══ 🇳🇴 NORVÈGE — Descente vers Lofoten ═══ */
+  [
+    [70.473097,25.059309],[69.929832,23.103742],[70.113843,22.927961],
+    [69.882737,21.983137],[69.751968,20.505476],[69.187549,19.697980],
+    [69.312105,17.714948],[68.995415,18.514622],[68.533840,17.196262],
+  ],
+
+  /* ═══ 🇳🇴 NORVÈGE — Lofoten ═══ */
+  [
+    [67.880802,12.978333],[68.214943,14.548404],[68.010751,15.308750],
+    [68.112012,15.842577],[68.009394,16.023852],[67.600948,15.930168],
+    [67.090193,15.374905],[66.500182,14.921729],
+  ],
+
+  /* ═══ 🇳🇴 NORVÈGE — Trondheim → Geiranger → Aurlandsfjellet ═══ */
+  [
+    [65.871684,13.208013],[65.356769,13.323492],[65.322077,12.635234],
+    [65.504657,12.298034],[65.397185,12.085551],[64.304826,12.283226],
+    [63.776470,11.461784],[63.433119,10.403634],[63.107555,7.785827],
+    [63.002900,7.296194],[62.559227,7.693444],[62.613883,7.126717],
+    [62.466968,6.824593],[62.100354,7.206368],[61.955476,6.467596],
+    [61.857177,6.810919],[61.867540,6.582953],[61.565612,6.473089],
+    [61.092550,7.522284],[60.910134,7.181707],[61.154184,8.678502],
+    [60.880030,10.903234],[61.354957,12.666539],[61.643285,12.732457],
+  ],
+
+  /* ═══ 🇸🇪 SUÈDE — Fulufjället → Göteborg → Malmö ═══ */
+  [
+    [60.707425,13.710654],[59.110383,13.007529],[57.702895,12.000535],
+    [56.624860,12.927634],[56.074559,12.775201],[55.602496,12.992303],
+    [55.674310,12.570577],
+  ],
+
+  /* ═══ 🇩🇰 DANEMARK — Copenhague → Aarhus ═══ */
+  [
+    [55.373268,11.255060],[55.379511,10.293756],[55.600473,9.579644],
+    [56.155121,10.183893],[55.517624,9.411466],[54.811616,9.307194],
+    [54.028669,9.953913],
+  ],
+
+  /* ═══ 🇩🇪 ALLEMAGNE (retour) — Berlin ═══ */
+  [
+    [53.950276,10.272226],[53.558632,10.407996],[53.344018,11.822879],
+    [52.762908,12.812554],[52.521677,13.406493],
+  ],
+
+  /* ═══ 🇩🇪🇨🇿 SAXE → Suisse saxonne → Prague ═══ */
+  [
+    [51.844391,13.917964],[51.138642,13.749935],[51.158210,13.959188],
+    [51.063235,13.938402],[50.992057,14.105847],[50.887606,14.233953],
+    [50.674842,14.174853],[50.299086,14.514456],[50.076501,14.436771],
+  ],
+
+  /* ═══ 🇨🇿🇸🇰 MORAVIE → Bratislava ═══ */
+  [
+    [49.876260,15.475902],[49.170279,15.607967],[48.469539,16.835391],
+    [48.143953,16.906191],[48.148143,17.104719],
+  ],
+
+  /* ═══ 🇭🇺 HONGRIE — Budapest ═══ */
+  [
+    [47.491679,19.042444],
+  ],
+
+  /* ═══ 🇷🇴 ROUMANIE — Transylvanie → Bucovine → Bucarest ═══ */
+  [
+    [47.877326,20.875340],[47.945055,22.397016],[47.684494,23.731960],
+    [47.807398,24.058910],[47.550932,24.520248],[47.630505,24.462894],
+    [47.441918,25.300842],[47.551149,25.878240],[47.265253,25.671741],
+    [47.087636,25.962438],[46.802213,25.492097],[46.292289,25.034821],
+    [45.798108,25.597179],[45.487032,25.240124],[45.847487,24.960551],
+    [45.709567,24.257426],[45.069188,24.405741],[45.141795,24.618915],
+    [44.427848,26.102095],
+  ],
+
+  /* ═══ 🇧🇬 BULGARIE (transit) → Istanbul ═══ */
+  [
+    [43.846397,25.986917],[43.521651,26.541647],[43.230901,26.552968],
+    [42.877949,26.443532],[42.653548,26.673726],[41.955829,26.598252],
+    [41.688666,26.585826],[41.117454,28.173360],[40.980746,28.964376],
+  ],
+
+  /* ═══ 🇹🇷 TURQUIE — Istanbul → Cappadoce → Antalya → Pamukkale → Éphèse → Izmir ═══ */
+  [
+    [40.741998,32.136558],[39.211106,33.163618],[38.501024,34.361128],
+    [38.663872,34.835535],[37.770908,32.364993],[37.731819,32.073855],
+    [36.734678,31.606936],[36.892997,30.728030],[36.490066,30.453636],
+    [36.240853,29.811570],[36.311606,29.317317],[36.661327,29.146755],
+    [36.958446,29.151943],[37.262644,29.466080],[37.913406,29.116041],
+    [37.794955,28.053471],[37.936987,27.348304],[38.026317,27.446448],
+    [38.240196,27.228094],[38.426557,27.147070],[39.062740,27.021534],
+    [39.549631,26.963271],[39.609506,26.407822],[39.961715,26.260221],
+    [40.411828,26.752261],[40.278047,28.932515],[40.790599,29.486817],
+    [41.163190,28.506293],
+  ],
+
+  /* ═══ 🇬🇷 GRÈCE — Thessalonique → Meteora ═══ */
+  [
+    [40.884782,25.768992],[41.079684,24.862620],[40.693469,22.978465],
+    [40.558665,22.585000],[40.359174,21.821744],[40.069976,21.437203],
+    [39.930127,21.575094],[39.719817,21.615878],[39.820940,21.324806],
+    [39.683510,20.888699],
+  ],
+
+  /* ═══ 🇦🇱 ALBANIE — Ksamil → Llogara → Lake Bovilla → Tirana ═══ */
+  [
+    [39.698883,20.969642],[39.594096,20.849565],[39.457504,20.335762],
+    [39.763975,19.999580],[39.918440,20.185895],[40.080483,20.142625],
+    [39.877993,20.026966],[40.214468,19.567480],[40.468057,19.521972],
+    [40.512966,19.792510],[40.267164,20.049316],[40.274499,20.277282],
+    [40.435661,20.280029],[40.770829,19.884598],[41.094526,20.016434],
+    [41.353946,19.770128],[41.443995,19.866613],[41.474059,20.089070],
+    [41.578668,20.485165],[41.519036,20.546369],[41.582123,20.621430],
+    [41.720182,20.665313],[41.656367,20.734600],
+  ],
+
+  /* ═══ 🇲🇰 MACÉDOINE DU NORD — Skopje ═══ */
+  [
+    [42.000525,20.995252],[42.003100,21.412133],[42.292156,21.195968],
+    [42.808110,21.165756],[42.821240,21.315086],
+  ],
+
+  /* ═══ 🇽🇰 KOSOVO ═══ */
+  [
+    [42.971678,20.347795],
+  ],
+
+  /* ═══ 🇷🇸 SERBIE — Zlatibor ═══ */
+  [
+    [43.696852,19.674883],
+  ],
+
+  /* ═══ 🇧🇦 BOSNIE — Jajce → Mostar → Sarajevo ═══ */
+  [
+    [43.818225,18.997689],[43.856205,18.411949],[44.139359,18.037831],
+    [44.143301,17.392384],[44.334173,17.266042],[43.939564,17.589711],
+    [43.628248,17.633656],[43.662198,17.759258],[43.500408,17.749548],
+    [43.407358,17.883555],[43.342628,17.805858],[43.191402,18.499813],
+    [42.856076,18.906307],
+  ],
+
+  /* ═══ 🇲🇪 MONTÉNÉGRO — Durmitor → Ostrog → Kotor → Sveti Stefan ═══ */
+  [
+    [43.099219,19.095821],[42.897871,19.080688],[42.898284,18.959524],
+    [42.812713,18.896353],[42.574505,19.054281],[42.462151,19.234182],
+    [42.384394,19.099575],[42.387253,18.933505],[42.302563,18.932534],
+    [42.315509,18.855688],[42.251860,18.898704],[42.281281,18.820566],
+    [42.378300,18.750072],[42.424950,18.799783],[42.486727,18.765223],
+    [42.487234,18.695872],[42.517101,18.691065],[42.489259,18.649867],
+    [42.478625,18.683855],[42.438605,18.607981],[42.455832,18.500864],
+  ],
+
+  /* ═══ 🇭🇷 CROATIE — Dubrovnik → Split → Plitvice ═══ */
+  [
+    [42.563681,18.247963],[42.617771,18.215691],[42.649596,18.094155],
+    [42.896908,17.568595],[43.161935,17.467341],[43.589277,16.640979],
+    [43.515894,16.441737],[43.582723,16.527889],[43.954651,16.082138],
+    [44.020885,16.123302],[44.247003,16.070876],[44.296170,15.870375],
+    [44.412040,15.889601],[44.768025,15.694594],[45.402229,15.248582],
+    [45.475816,15.438911],[45.831488,15.159244],
+  ],
+
+  /* ═══ 🇸🇮 SLOVÉNIE — Lac de Bled → Vršič Pass ═══ */
+  [
+    [46.039494,14.444542],[46.356741,14.126033],[46.513227,13.314342],
+    [46.329572,13.058910],[45.895451,13.281383],[45.790217,12.830943],
+    [45.945129,12.622203],[45.880156,12.347545],
+  ],
+
+  /* ═══ 🇮🇹 ITALIE — Dolomites → retour Ivry ═══ */
+  [
+    [46.394016,11.842174],[46.682631,11.110615],[46.644591,10.593267],
+    [47.350271,10.810369],[48.446523,9.983535],[48.964732,8.445347],
+    [48.571991,6.509910],[48.812871,2.366504],
+  ]
+
+);
 
 var line = L.polyline(routeCoords, {
   color: '#c8372b',
@@ -1662,7 +2379,7 @@ updateMarkerSizes();
 ═══════════════════════════════ */
 
 // ⚙️ GOOGLE SHEETS — remplace cette URL par ton URL de déploiement Apps Script
-var GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyzIMRC8dTGNWNrwaXohVwOZ1FmtrmVeYcdt9YlqtdW_9X6tibr5lqI8opEtSWZkTRnJA/exec';
+var GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzB78KxhH_SjLAyXBynxCMmTM1fbvLw4zpOfL_qjOVOnnWdirm0kaRN9EISocat3CnpMg/exec';
 
 function openModal() {
   document.getElementById('modalOverlay').classList.add('open');
@@ -1738,6 +2455,392 @@ async function sendSuggestion() {
   }
 }
 
+
+
+/* ══════════════════════════════════════════
+   TOGGLE CALQUES VIA LÉGENDE
+══════════════════════════════════════════ */
+var layerVisible = { poi: true, van: true, route: true, warning: true };
+var layerMap = { poi: poiMarkers, van: vanLayer, route: routeLayer, warning: warningLayer };
+
+function toggleLayer(el) {
+  var key = el.dataset.layer;
+  if (!layerMap[key]) return;
+  layerVisible[key] = !layerVisible[key];
+  if (layerVisible[key]) {
+    map.addLayer(layerMap[key]);
+    el.classList.remove('hidden-layer');
+  } else {
+    map.removeLayer(layerMap[key]);
+    el.classList.add('hidden-layer');
+  }
+}
+
+/* ══════════════════════════════════════════
+   MÉTÉO DU VOYAGE
+══════════════════════════════════════════ */
+var meteoData = [
+  {
+    num: 1, dates: "07–13 juil.", icon: "⛅", zone: "France → Forêt-Noire", temp: "18–25°C",
+    desc: "Orages possibles, météo estivale stable",
+    lieux: ["Forêt-Noire", "Lac de Constance"]
+  },
+  {
+    num: 2, dates: "14–20 juil.", icon: "🌤️", zone: "Slovaquie → Pologne", temp: "20–28°C",
+    desc: "Orages d'été possibles, nuits 12–18°C",
+    lieux: ["Hautes Tatras", "Cracovie"]
+  },
+  {
+    num: 3, dates: "21–27 juil.", icon: "🌥️", zone: "Lituanie → Estonie", temp: "18–24°C",
+    desc: "Journées très longues, pluies courtes possibles",
+    lieux: ["Vilnius", "Riga"]
+  },
+  {
+    num: 4, dates: "28 juil.–3 août", icon: "🌤️", zone: "Helsinki → Koli", temp: "17–23°C",
+    desc: "Climat très agréable, moustiques possibles",
+    lieux: ["Parc national de Koli"]
+  },
+  {
+    num: 5, dates: "4–10 août", icon: "🌥️", zone: "Laponie → Oulanka", temp: "15–22°C",
+    desc: "Nuits fraîches, météo stable",
+    lieux: []
+  },
+  {
+    num: 6, dates: "11–17 août", icon: "🌬️", zone: "Cap Nord", temp: "8–15°C",
+    desc: "Vent fréquent, brouillard possible",
+    lieux: ["Cap Nord"]
+  },
+  {
+    num: 7, dates: "18–24 août", icon: "🌧️", zone: "Senja → Lofoten", temp: "12–18°C",
+    desc: "Pluies fréquentes, météo changeante. ~80mm/mois",
+    lieux: ["Îles Lofoten"]
+  },
+  {
+    num: 8, dates: "25–31 août", icon: "🌫️", zone: "Trondheim → Geiranger", temp: "10–17°C",
+    desc: "Brume possible, météo montagne changeante",
+    lieux: ["Geirangerfjord"]
+  },
+  {
+    num: 9, dates: "1–7 sept.", icon: "🍂", zone: "Suède → Göteborg", temp: "14–20°C",
+    desc: "Météo stable, début couleurs d'automne",
+    lieux: []
+  },
+  {
+    num: 10, dates: "8–14 sept.", icon: "☀️", zone: "Danemark → Berlin", temp: "15–22°C",
+    desc: "Très bon climat voyage",
+    lieux: ["Copenhague"]
+  },
+  {
+    num: 11, dates: "15–21 sept.", icon: "☀️", zone: "Prague → Bratislava", temp: "17–24°C",
+    desc: "Météo parfaite roadtrip",
+    lieux: ["Prague"]
+  },
+  {
+    num: 12, dates: "22–28 sept.", icon: "🌤️", zone: "Hongrie → Roumanie", temp: "18–26°C",
+    desc: "Sec, automne doux",
+    lieux: ["Budapest"]
+  },
+  {
+    num: 13, dates: "29 sept.–12 oct.", icon: "☀️", zone: "Istanbul → Cappadoce", temp: "20–27°C / 10–14°C nuit",
+    desc: "Idéal pour les montgolfières, très peu de pluie",
+    lieux: ["Cappadoce"]
+  },
+  {
+    num: 14, dates: "13–19 oct.", icon: "🌅", zone: "Antalya → Pamukkale", temp: "25–30°C",
+    desc: "Mer chaude, météo parfaite",
+    lieux: ["Pamukkale"]
+  },
+  {
+    num: 15, dates: "20–26 oct.", icon: "🍂", zone: "Thessalonique → Meteora", temp: "18–25°C",
+    desc: "Automne très agréable",
+    lieux: ["Meteora"]
+  },
+  {
+    num: 16, dates: "27 oct.–9 nov.", icon: "🌦️", zone: "Albanie → Monténégro", temp: "14–20°C",
+    desc: "Pluie possible, très peu de touristes",
+    lieux: ["Ksamil"]
+  },
+  {
+    num: 17, dates: "10–23 nov.", icon: "🌧️", zone: "Bosnie → Croatie", temp: "10–16°C",
+    desc: "Météo variable",
+    lieux: ["Mostar"]
+  },
+  {
+    num: 18, dates: "24 nov.–9 janv.", icon: "❄️", zone: "Slovénie → Dolomites", temp: "0–8°C",
+    desc: "Neige possible",
+    lieux: ["Dolomites"]
+  }
+];
+
+var meteoOpen = false;
+
+function toggleMeteo() {
+  var panel = document.getElementById("meteoPanel");
+  var tab = document.getElementById("meteoTab");
+  meteoOpen = !meteoOpen;
+  panel.classList.toggle("open", meteoOpen);
+  // Décaler le tab quand panneau ouvert
+  tab.style.left = meteoOpen ? "260px" : "0";
+  tab.style.borderRadius = meteoOpen ? "0 10px 10px 0" : "0 10px 10px 0";
+  if (meteoOpen && !document.getElementById("meteoInner").children.length) {
+    buildMeteo();
+  }
+}
+
+function buildMeteo() {
+  var inner = document.getElementById("meteoInner");
+  inner.innerHTML = "";
+  meteoData.forEach(function(w) {
+    var card = document.createElement("div");
+    card.className = "meteo-week";
+    card.innerHTML =
+      '<div class="meteo-week-header">' +
+        '<span class="meteo-week-num">Sem. ' + w.num + '</span>' +
+        '<span class="meteo-icon">' + w.icon + '</span>' +
+      "</div>" +
+      '<div style="font-size:9px;color:var(--red);font-weight:600;margin-bottom:2px;">' + (w.dates || '') + "</div>" +
+      '<div class="meteo-zone">' + w.zone + "</div>" +
+      '<div class="meteo-temp">' + w.temp + "</div>" +
+      '<div class="meteo-desc">' + w.desc + "</div>" +
+      (w.lieux.length ? '<div class="meteo-lieux">📍 ' + w.lieux.join(", ") + "</div>" : "");
+    inner.appendChild(card);
+  });
+}
+
+/* ══════════════════════════════════════════
+   COUNTDOWN DÉPART
+══════════════════════════════════════════ */
+(function() {
+  var depart = new Date('2026-07-07T00:00:00');
+  function updateCountdown() {
+    var now = new Date();
+    var diff = Math.ceil((depart - now) / (1000 * 60 * 60 * 24));
+    var el = document.getElementById('countdownNum');
+    if (!el) return;
+    if (diff > 0) {
+      el.textContent = diff;
+    } else if (diff === 0) {
+      el.textContent = '🎉';
+    } else {
+      el.textContent = 'C\'est parti !';
+      el.style.fontSize = '11px';
+    }
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 60000);
+})();
+
+/* ══════════════════════════════════════════
+   FRISE TEMPORELLE
+══════════════════════════════════════════ */
+(function() {
+  var friseData = [
+    {flagCode:'fr', country:'France',         duration:3},
+    {flagCode:'de', country:'Allemagne',      duration:15},
+    {flagCode:'cz', country:'Rép. tchèque',   duration:8},
+    {flagCode:'sk', country:'Slovaquie',      duration:7},
+    {flagCode:'pl', country:'Pologne',        duration:12},
+    {flagCode:'lt', country:'Lituanie',       duration:5},
+    {flagCode:'lv', country:'Lettonie',       duration:4},
+    {flagCode:'ee', country:'Estonie',        duration:5},
+    {flagCode:'fi', country:'Finlande',       duration:10},
+    {flagCode:'no', country:'Norvège',        duration:15},
+    {flagCode:'se', country:'Suède',          duration:5},
+    {flagCode:'dk', country:'Danemark',       duration:5},
+    {flagCode:'de', country:'Allemagne',      duration:4},
+    {flagCode:'cz', country:'Rép. tchèque',   duration:5},
+    {flagCode:'sk', country:'Slovaquie',      duration:3},
+    {flagCode:'hu', country:'Hongrie',        duration:3},
+    {flagCode:'ro', country:'Roumanie',       duration:8},
+    {flagCode:'tr', country:'Turquie',        duration:17},
+    {flagCode:'gr', country:'Grèce',          duration:5},
+    {flagCode:'al', country:'Albanie',        duration:7},
+    {flagCode:'mk', country:'Macédoine',      duration:4},
+    {flagCode:'xk', country:'Kosovo',         duration:3},
+    {flagCode:'rs', country:'Serbie',         duration:3},
+    {flagCode:'ba', country:'Bosnie',         duration:8},
+    {flagCode:'me', country:'Monténégro',     duration:7},
+    {flagCode:'hr', country:'Croatie',        duration:7},
+    {flagCode:'si', country:'Slovénie',       duration:3},
+    {flagCode:'it', country:'Italie',         duration:5}
+  ];
+  var totalDays = friseData.reduce(function(s, d) { return s + d.duration; }, 0);
+
+  // Palette alternée pastel pour lisibilité
+  var palette = [
+    '#f0e6d3','#dce8f0','#e8f0dc','#f0dce8','#dce8e8',
+    '#f0e8dc','#dce0f0','#eef0dc','#f0dce0','#dce8dc'
+  ];
+
+  var bar = document.getElementById('friseBar');
+  if (!bar) return;
+
+  var totalWidth = bar.offsetWidth || window.innerWidth;
+
+  // Date de départ : 07/07/2025
+  var start = new Date('2025-07-07');
+  var end = new Date(start);
+  end.setDate(end.getDate() + totalDays);
+  var today = new Date();
+
+  friseData.forEach(function(seg, i) {
+    var div = document.createElement('div');
+    div.className = 'frise-segment';
+    div.style.flex = seg.duration;
+    div.style.background = palette[i % palette.length];
+    div.title = seg.country + ' — ' + seg.duration + ' jours';
+
+    var flag = document.createElement('img');
+    flag.src = 'https://flagcdn.com/20x15/' + seg.flagCode + '.png';
+    flag.style.cssText = 'width:20px;height:15px;border-radius:2px;flex-shrink:0;';
+    flag.alt = seg.country;
+
+    var label = document.createElement('div');
+    label.className = 'frise-label';
+    label.textContent = seg.country;
+
+    div.appendChild(flag);
+    div.appendChild(label);
+    bar.appendChild(div);
+  });
+
+  // Ligne "aujourd'hui" si on est dans la période du voyage
+  if (today >= start && today <= end) {
+    var elapsed = (today - start) / (1000 * 60 * 60 * 24);
+    var pct = (elapsed / totalDays) * 100;
+    var marker = document.createElement('div');
+    marker.className = 'frise-today';
+    marker.style.left = pct + '%';
+    bar.appendChild(marker);
+  }
+
+  // ── Frise des mois ──
+  var monthsBar = document.getElementById('friseMonths');
+  if (!monthsBar) return;
+
+  var MONTHS_FR = ['Juil.','Août','Sept.','Oct.','Nov.','Déc.','Jan.'];
+  // Iterate month by month from start to end
+  var cursor = new Date(start);
+  cursor.setDate(1); // align to month start
+  // But first segment starts at start date
+  var prevDate = new Date(start);
+
+  while (prevDate < end) {
+    // Next month boundary
+    var nextMonth = new Date(prevDate);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    nextMonth.setDate(1);
+    if (nextMonth > end) nextMonth = new Date(end);
+
+    var segDays = (nextMonth - prevDate) / (1000 * 60 * 60 * 24);
+    var pctWidth = (segDays / totalDays) * 100;
+
+    var mDiv = document.createElement('div');
+    mDiv.className = 'frise-month';
+    // Check if this is current month
+    var isCurrentMonth = (today >= prevDate && today < nextMonth);
+    if (isCurrentMonth) mDiv.classList.add('current-month');
+    mDiv.style.flex = segDays;
+
+    var mLabel = MONTHS_FR[prevDate.getMonth() - 6 < 0 ? prevDate.getMonth() - 6 + 12 : prevDate.getMonth() - 6];
+    // Simpler: just use month index
+    var monthNames = ['Jan.','Fév.','Mars','Avr.','Mai','Juin','Juil.','Août','Sept.','Oct.','Nov.','Déc.'];
+    mDiv.textContent = monthNames[prevDate.getMonth()] + (prevDate.getFullYear() !== 2025 ? ' 26' : '');
+
+    monthsBar.appendChild(mDiv);
+    prevDate = nextMonth;
+  }
+
+  // Today marker on months bar too
+  if (today >= start && today <= end) {
+    var elapsedM = (today - start) / (1000 * 60 * 60 * 24);
+    var pctM = (elapsedM / totalDays) * 100;
+    var markerM = document.createElement('div');
+    markerM.style.cssText = 'position:absolute;top:0;bottom:0;width:2px;background:var(--red);left:' + pctM + '%;pointer-events:none;z-index:10;';
+    monthsBar.appendChild(markerM);
+  }
+})();
+
+/* ══════════════════════════════════════════
+   SUGGESTIONS REÇUES (lecture Google Sheet)
+══════════════════════════════════════════ */
+var likedSuggestions = JSON.parse(localStorage.getItem('calm_likes') || '{}');
+
+function openSuggestions() {
+  document.getElementById('suggestionsOverlay').classList.add('open');
+  loadSuggestions();
+}
+
+function closeSuggestions() {
+  document.getElementById('suggestionsOverlay').classList.remove('open');
+}
+
+function loadSuggestions() {
+  var list = document.getElementById('suggList');
+  list.innerHTML = '<div class="sugg-loading">Chargement des idées… ✨</div>';
+
+  fetch(GOOGLE_SHEET_URL)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.suggestions && data.suggestions.length) {
+        renderSuggestions(data.suggestions.slice().reverse());
+      } else {
+        list.innerHTML = "<div class='sugg-empty'>Aucune idée reçue pour l'instant — soyez les premiers ! 🌍</div>";
+      }
+    })
+    .catch(function() {
+      list.innerHTML = "<div class='sugg-empty'>Impossible de charger les idées pour l'instant.</div>";
+    });
+}
+
+function renderSuggestions(suggestions) {
+  var list = document.getElementById('suggList');
+  if (!suggestions.length) {
+    list.innerHTML = '<div class="sugg-empty">Aucune idée pour l\'instant — soyez les premiers ! 🌍</div>';
+    return;
+  }
+  list.innerHTML = '';
+  suggestions.forEach(function(s, i) {
+    var key = s.prenom + '_' + s.lieu + '_' + i;
+    var liked = !!likedSuggestions[key];
+    var likeCount = likedSuggestions[key + '_count'] || 0;
+
+    var card = document.createElement('div');
+    card.className = 'sugg-card';
+    card.innerHTML =
+      '<div class="sugg-card-top">' +
+        '<span class="sugg-card-name">✉️ ' + (s.prenom || 'Anonyme') + '</span>' +
+        '<span class="sugg-card-place">📍 ' + s.lieu + '</span>' +
+      '</div>' +
+      (s.description ? '<div class="sugg-card-desc">' + s.description + '</div>' : '') +
+      '<div class="sugg-card-meta">' +
+        '<span class="sugg-card-date">' + s.date + '</span>' +
+        '<button class="like-btn ' + (liked ? 'liked' : '') + '" data-key="' + key + '" onclick="toggleLike(this)">' +
+          '❤️ ' + (liked ? 'Aimé' : 'J\u0027aime') + (likeCount > 0 ? ' · ' + likeCount : '') +
+        '</button>' +
+      '</div>';
+    list.appendChild(card);
+  });
+}
+
+function toggleLike(btn) {
+  var key = btn.dataset.key;
+  var liked = !!likedSuggestions[key];
+  if (liked) {
+    delete likedSuggestions[key];
+    likedSuggestions[key + '_count'] = Math.max(0, (likedSuggestions[key + '_count'] || 1) - 1);
+    btn.classList.remove('liked');
+    btn.textContent = '❤️ J\u0027aime' + (likedSuggestions[key + '_count'] > 0 ? ' · ' + likedSuggestions[key + '_count'] : '');
+  } else {
+    likedSuggestions[key] = true;
+    likedSuggestions[key + '_count'] = (likedSuggestions[key + '_count'] || 0) + 1;
+    btn.classList.add('liked');
+    btn.textContent = '❤️ Aimé · ' + likedSuggestions[key + '_count'];
+  }
+  localStorage.setItem('calm_likes', JSON.stringify(likedSuggestions));
+}
+
+
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     closeModal();
@@ -1748,7 +2851,7 @@ document.addEventListener('keydown', function(e) {
 /* ═══ NAVIGATION MOBILE ═══ */
 function mobileNav(tab, btn) {
   var sidebar = document.querySelector('.sidebar');
-  var suggestBtn = document.querySelector('.suggest-btn');
+  var suggestBtn = document.getElementById('mapBtns');
 
   // Mettre à jour les boutons actifs
   document.querySelectorAll('.bottom-nav-btn').forEach(function(b) {
@@ -1814,6 +2917,23 @@ function mobileNav(tab, btn) {
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeModal()">Annuler</button>
       <button class="btn-primary" id="btnSend" onclick="sendSuggestion()">📨 Envoyer mon idée</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ MODALE SUGGESTIONS REÇUES ═══ -->
+<div class="suggestions-overlay" id="suggestionsOverlay" onclick="if(event.target===this)closeSuggestions()">
+  <div class="suggestions-modal">
+    <div class="sugg-header">
+      <div>
+        <h3>💡 Idées de la communauté</h3>
+        <p>Les lieux suggérés par vos proches</p>
+      </div>
+      <button class="modal-close" onclick="closeSuggestions()">✕</button>
+    </div>
+    <div class="sugg-list" id="suggList">
+      <div class="sugg-loading">Chargement des idées…</div>
     </div>
   </div>
 </div>
