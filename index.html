@@ -1678,24 +1678,6 @@ var scenicRoutes = [
 ══════════════════════════════════════════ */
 var warnings = [
   {
-    name: "Vignette Slovaquie",
-    coords: [48.148, 17.107],
-    desc: "Vignette obligatoire pour les autoroutes slovaques. À acheter en ligne avant ou aux stations-service frontière.",
-    poi: ["Prix : ~15€ / 10 jours", "Achat en ligne : eznamka.sk"]
-  },
-  {
-    name: "Vignette Autriche",
-    coords: [47.800, 13.000],
-    desc: "Vignette obligatoire sur toutes les autoroutes autrichiennes.",
-    poi: ["Prix : ~9€ / 10 jours", "Achat en ligne : asfinag.at"]
-  },
-  {
-    name: "Alcool Norvège",
-    coords: [65.000, 14.000],
-    desc: "Alcool très cher et restrictions strictes en Norvège. Prévoir ses stocks avant d'entrer.",
-    poi: ["Bière en supermarché max 4.7°", "Spiritueux uniquement en Vinmonopolet"]
-  },
-  {
     name: "Bivouac Norvège — réglementation",
     coords: [69.000, 20.000],
     desc: "Le droit de séjour en pleine nature (allemannsretten) autorise 2 nuits max au même endroit, à 150m min des habitations.",
@@ -1706,12 +1688,6 @@ var warnings = [
     coords: [41.700, 26.600],
     desc: "L'assurance green card doit être valide pour la Turquie. Vérifier avant le départ.",
     poi: ["Green card Turquie obligatoire", "Contrôle strict à la frontière"]
-  },
-  {
-    name: "Passage Bosnie — change",
-    coords: [44.500, 16.500],
-    desc: "La Bosnie-Herzégovine utilise le mark convertible (BAM). Pas d'euros acceptés partout.",
-    poi: ["1€ ≈ 1.96 BAM", "Prévoir du cash local"]
   },
   {
     name: "Ferry Helsinki — Tallinn",
@@ -2260,17 +2236,17 @@ var planning = [
     stops: ['Le lac de Batlava']
   },
   {
-    flagCode: 'rs', country: 'Serbie', duration: 3, dates: '07/12/ -> 10/12',
+    flagCode: 'rs', country: 'Serbie', duration: 3, dates: '07/12 -> 10/12',
     note: "Traversée de la Serbie.",
     stops: ['Zlatibor']
   },
   {
-    flagCode: 'ba', country: 'Bosnie-Herzégovine', duration: 8, dates: '10/12/ -> 18/12',
+    flagCode: 'ba', country: 'Bosnie-Herzégovine', duration: 8, dates: '10/12 -> 18/12',
     note: "Visite des terres.",
     stops: ['Jajce', 'Mostar', 'Sarajevo']
   },
   {
-    flagCode: 'me', country: 'Monténégro', duration: 7, dates: '18/12/ -> 25/12',
+    flagCode: 'me', country: 'Monténégro', duration: 7, dates: '18/12 -> 25/12',
     note: "Entre montagne et mer.",
     stops: ['Le parc national du Durmitor', 'Le monastère d\'Ostrog', 'Sveti Stefan', 'Le parc national de Lovcen']
   },
@@ -2481,93 +2457,165 @@ function toggleLayer(el) {
 ══════════════════════════════════════════ */
 var meteoData = [
   {
-    num: 1, dates: "07–13 juil.", icon: "⛅", zone: "France → Forêt-Noire", temp: "18–25°C",
-    desc: "Orages possibles, météo estivale stable",
-    lieux: ["Forêt-Noire", "Lac de Constance"]
+    num: 1, dates: "7–14 juil.", icon: "⛅", zone: "France → Sud Allemagne",
+    temp: "22–30°C",
+    desc: "Orages d'été possibles · 8–10h soleil/jour · conditions idéales pour la route",
+    lieux: ["Husseren-les-Châteaux", "Forêt-Noire"]
   },
   {
-    num: 2, dates: "14–20 juil.", icon: "🌤️", zone: "Slovaquie → Pologne", temp: "20–28°C",
-    desc: "Orages d'été possibles, nuits 12–18°C",
-    lieux: ["Hautes Tatras", "Cracovie"]
+    num: 2, dates: "14–21 juil.", icon: "🌤️", zone: "Bavière",
+    temp: "23–28°C",
+    desc: "Quelques orages · 15°C en altitude",
+    lieux: ["Lac de Constance", "Château de Neuschwanstein"]
   },
   {
-    num: 3, dates: "21–27 juil.", icon: "🌥️", zone: "Lituanie → Estonie", temp: "18–24°C",
-    desc: "Journées très longues, pluies courtes possibles",
-    lieux: ["Vilnius", "Riga"]
+    num: 3, dates: "21–28 juil.", icon: "🌥️", zone: "Sud République tchèque",
+    temp: "22–27°C",
+    desc: "Pluies modérées · longues journées",
+    lieux: ["Český Krumlov", "České Budějovice"]
   },
   {
-    num: 4, dates: "28 juil.–3 août", icon: "🌤️", zone: "Helsinki → Koli", temp: "17–23°C",
-    desc: "Climat très agréable, moustiques possibles",
-    lieux: ["Parc national de Koli"]
+    num: 4, dates: "28 juil.–4 août", icon: "⛈️", zone: "Tatras",
+    temp: "18–24°C",
+    desc: "Orages de montagne · nuits fraîches 10°C",
+    lieux: ["Vysoké Tatry"]
   },
   {
-    num: 5, dates: "4–10 août", icon: "🌥️", zone: "Laponie → Oulanka", temp: "15–22°C",
-    desc: "Nuits fraîches, météo stable",
+    num: 5, dates: "4–11 août", icon: "🌤️", zone: "Sud Pologne",
+    temp: "20–26°C",
+    desc: "Pluies modérées",
+    lieux: ["Cracovie"]
+  },
+  {
+    num: 6, dates: "11–18 août", icon: "🌦️", zone: "Nord Pologne",
+    temp: "19–25°C",
+    desc: "Parfois humide",
+    lieux: ["Forêt de Białowieża"]
+  },
+  {
+    num: 7, dates: "18–25 août", icon: "🌤️", zone: "Lituanie",
+    temp: "18–24°C",
+    desc: "Pluies faibles",
+    lieux: ["Vilnius", "Trakai"]
+  },
+  {
+    num: 8, dates: "25 août–1 sept.", icon: "🌥️", zone: "Riga → Estonie",
+    temp: "17–22°C",
+    desc: "Météo variable",
     lieux: []
   },
   {
-    num: 6, dates: "11–17 août", icon: "🌬️", zone: "Cap Nord", temp: "8–15°C",
-    desc: "Vent fréquent, brouillard possible",
-    lieux: ["Cap Nord"]
+    num: 9, dates: "1–8 sept.", icon: "🌤️", zone: "Helsinki",
+    temp: "15–20°C",
+    desc: "Pluies faibles",
+    lieux: ["Helsinki"]
   },
   {
-    num: 7, dates: "18–24 août", icon: "🌧️", zone: "Senja → Lofoten", temp: "12–18°C",
-    desc: "Pluies fréquentes, météo changeante. ~80mm/mois",
-    lieux: ["Îles Lofoten"]
+    num: 10, dates: "8–15 sept.", icon: "🌌", zone: "Finlande nord",
+    temp: "10–15°C",
+    desc: "Pluies faibles · premières aurores boréales possibles",
+    lieux: ["Lac Inari"]
   },
   {
-    num: 8, dates: "25–31 août", icon: "🌫️", zone: "Trondheim → Geiranger", temp: "10–17°C",
-    desc: "Brume possible, météo montagne changeante",
+    num: 11, dates: "15–22 sept.", icon: "🌬️", zone: "Nord Norvège",
+    temp: "7–12°C",
+    desc: "Pluies fréquentes · vent",
+    lieux: ["Cap Nord", "Lofoten"]
+  },
+  {
+    num: 12, dates: "22–29 sept.", icon: "🌧️", zone: "Fjords",
+    temp: "8–14°C",
+    desc: "Pluies assez fréquentes",
     lieux: ["Geirangerfjord"]
   },
   {
-    num: 9, dates: "1–7 sept.", icon: "🍂", zone: "Suède → Göteborg", temp: "14–20°C",
-    desc: "Météo stable, début couleurs d'automne",
+    num: 13, dates: "29 sept.–6 oct.", icon: "🌥️", zone: "Suède → Danemark",
+    temp: "12–16°C",
+    desc: "Pluies modérées",
     lieux: []
   },
   {
-    num: 10, dates: "8–14 sept.", icon: "☀️", zone: "Danemark → Berlin", temp: "15–22°C",
-    desc: "Très bon climat voyage",
-    lieux: ["Copenhague"]
+    num: 14, dates: "6–13 oct.", icon: "🍂", zone: "Berlin",
+    temp: "10–15°C",
+    desc: "Automne magnifique",
+    lieux: ["Berlin"]
   },
   {
-    num: 11, dates: "15–21 sept.", icon: "☀️", zone: "Prague → Bratislava", temp: "17–24°C",
-    desc: "Météo parfaite roadtrip",
-    lieux: ["Prague"]
+    num: 15, dates: "13–20 oct.", icon: "🌥️", zone: "Prague → Bratislava",
+    temp: "9–15°C",
+    desc: "Automne doux",
+    lieux: ["Prague", "Bratislava"]
   },
   {
-    num: 12, dates: "22–28 sept.", icon: "🌤️", zone: "Hongrie → Roumanie", temp: "18–26°C",
-    desc: "Sec, automne doux",
+    num: 16, dates: "20–27 oct.", icon: "🌤️", zone: "Budapest",
+    temp: "10–17°C",
+    desc: "Automne agréable",
     lieux: ["Budapest"]
   },
   {
-    num: 13, dates: "29 sept.–12 oct.", icon: "☀️", zone: "Istanbul → Cappadoce", temp: "20–27°C / 10–14°C nuit",
-    desc: "Idéal pour les montgolfières, très peu de pluie",
+    num: 17, dates: "27 oct.–3 nov.", icon: "❄️", zone: "Roumanie",
+    temp: "8–14°C",
+    desc: "Neige possible en montagne",
+    lieux: []
+  },
+  {
+    num: 18, dates: "3–10 nov.", icon: "🌤️", zone: "Istanbul",
+    temp: "15–20°C",
+    desc: "Automne doux",
+    lieux: ["Istanbul"]
+  },
+  {
+    num: 19, dates: "10–17 nov.", icon: "🌙", zone: "Cappadoce",
+    temp: "10–16°C",
+    desc: "Nuits froides",
     lieux: ["Cappadoce"]
   },
   {
-    num: 14, dates: "13–19 oct.", icon: "🌅", zone: "Antalya → Pamukkale", temp: "25–30°C",
-    desc: "Mer chaude, météo parfaite",
-    lieux: ["Pamukkale"]
+    num: 20, dates: "17–24 nov.", icon: "🍂", zone: "Grèce",
+    temp: "14–20°C",
+    desc: "Automne agréable",
+    lieux: ["Météores"]
   },
   {
-    num: 15, dates: "20–26 oct.", icon: "🍂", zone: "Thessalonique → Meteora", temp: "18–25°C",
-    desc: "Automne très agréable",
-    lieux: ["Meteora"]
+    num: 21, dates: "24 nov.–1 déc.", icon: "🌧️", zone: "Albanie",
+    temp: "12–18°C",
+    desc: "Plus humide",
+    lieux: []
   },
   {
-    num: 16, dates: "27 oct.–9 nov.", icon: "🌦️", zone: "Albanie → Monténégro", temp: "14–20°C",
-    desc: "Pluie possible, très peu de touristes",
-    lieux: ["Ksamil"]
+    num: 22, dates: "1–8 déc.", icon: "🌥️", zone: "Macédoine du Nord",
+    temp: "8–12°C",
+    desc: "Froid hivernal",
+    lieux: ["Skopje"]
   },
   {
-    num: 17, dates: "10–23 nov.", icon: "🌧️", zone: "Bosnie → Croatie", temp: "10–16°C",
-    desc: "Météo variable",
-    lieux: ["Mostar"]
-  },
-  {
-    num: 18, dates: "24 nov.–9 janv.", icon: "❄️", zone: "Slovénie → Dolomites", temp: "0–8°C",
+    num: 23, dates: "8–15 déc.", icon: "❄️", zone: "Bosnie",
+    temp: "3–8°C",
     desc: "Neige possible",
+    lieux: ["Sarajevo"]
+  },
+  {
+    num: 24, dates: "15–22 déc.", icon: "❄️", zone: "Monténégro",
+    temp: "-2–6°C",
+    desc: "Neige probable",
+    lieux: ["Parc national du Durmitor"]
+  },
+  {
+    num: 25, dates: "22–29 déc.", icon: "🌧️", zone: "Croatie",
+    temp: "7–12°C",
+    desc: "Hiver côtier doux",
+    lieux: []
+  },
+  {
+    num: 26, dates: "29 déc.–5 janv.", icon: "❄️", zone: "Slovénie",
+    temp: "0–6°C",
+    desc: "Froid hivernal",
+    lieux: ["Lac de Bled"]
+  },
+  {
+    num: 27, dates: "5–9 janv.", icon: "❄️", zone: "Dolomites",
+    temp: "-8–2°C",
+    desc: "Neige fréquente",
     lieux: ["Dolomites"]
   }
 ];
